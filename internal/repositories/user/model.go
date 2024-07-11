@@ -10,6 +10,8 @@ type User struct {
 	Name        string
 	DisplayName string
 	Email       string
+	Password    string
+	IsVerified  string
 	AvatarUrl   string
 	CreatedAt   time.Time
 	EditedAt    time.Time

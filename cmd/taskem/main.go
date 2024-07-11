@@ -1,12 +1,21 @@
 package main
 
 import (
+	"context"
 	"go.uber.org/fx"
 	"taskem/internal/app"
 )
 
 func main() {
-	fx.New(
+	app := fx.New(
 		app.App,
-	).Run()
+	)
+
+	app.Run()
+
+	defer app.Stop(context.Background())
+
+	app.Run()
+
+	<-app.Done()
 }

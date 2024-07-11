@@ -8,6 +8,8 @@ import (
 type Config struct {
 	AppEnv string `envconfig:"APP_ENV" default:"dev"`
 
+	GrpcPort int `envconfig:"GRPC_PORT" default:"50051"`
+
 	PostgresUrl string `envconfig:"POSTGRES_URL"`
 	RedisURL    string `envconfig:"REDIS_URL"`
 

@@ -32,6 +32,8 @@ var selectUserFields = []string{
 	"name",
 	"display_name",
 	"email",
+	"password",
+	"is_verified",
 	"avatar_url",
 	"created_at",
 	"edited_at",
@@ -50,6 +52,10 @@ func (p *Pgx) Update(ctx context.Context, userID uuid.UUID, opts UpdateOpts) (*U
 
 	if opts.AvatarUrl != nil {
 		updateMap["avatar_url"] = *opts.DisplayName
+	}
+
+	if opts.IsVerified != nil {
+		updateMap["is_verified"] = *opts.IsVerified
 	}
 
 	query, args, err := squirrel.StatementBuilder.PlaceholderFormat(squirrel.Dollar).
@@ -101,6 +107,8 @@ func (p *Pgx) FindMany(ctx context.Context, opts FindManyOpts) (*FindManyResult,
 			&user.Name,
 			&user.DisplayName,
 			&user.Email,
+			&user.Password,
+			&user.IsVerified,
 			&user.AvatarUrl,
 			&user.CreatedAt,
 			&user.EditedAt,
@@ -150,9 +158,9 @@ func (p *Pgx) FindByID(ctx context.Context, userID uuid.UUID) (*User, error) {
 		&user.Name,
 		&user.DisplayName,
 		&user.Email,
+		&user.Password,
+		&user.IsVerified,
 		&user.AvatarUrl,
-		&user.CreatedAt,
-		&user.EditedAt,
 	)
 	if err != nil {
 		return nil, err
@@ -166,6 +174,8 @@ func (p *Pgx) Create(ctx context.Context, opts CreateOpts) (*User, error) {
 		"name",
 		"display_name",
 		"email",
+		"password",
+		"is_verified",
 		"avatar_url",
 		"created_at",
 	}
@@ -177,6 +187,8 @@ func (p *Pgx) Create(ctx context.Context, opts CreateOpts) (*User, error) {
 			opts.Name,
 			opts.DisplayName,
 			opts.Email,
+			opts.Password,
+			false,
 			opts.AvatarUrl,
 			time.Now(),
 		).ToSql()
@@ -203,6 +215,8 @@ func (p *Pgx) Create(ctx context.Context, opts CreateOpts) (*User, error) {
 		&user.Name,
 		&user.DisplayName,
 		&user.Email,
+		&user.Password,
+		&user.IsVerified,
 		&user.AvatarUrl,
 		&user.CreatedAt,
 		&user.EditedAt,
@@ -233,6 +247,39 @@ func (p *Pgx) FindByName(ctx context.Context, name string) (*User, error) {
 		&user.Name,
 		&user.DisplayName,
 		&user.Email,
+		&user.Password,
+		&user.IsVerified,
+		&user.AvatarUrl,
+		&user.CreatedAt,
+		&user.EditedAt,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	return &user, nil
+}
+
+func (p *Pgx) FindByEmail(ctx context.Context, email string) (*User, error) {
+	query, args, err := squirrel.StatementBuilder.PlaceholderFormat(squirrel.Dollar).
+		Select(selectUserFields...).
+		From(tableName).
+		Where(squirrel.Eq{"email": email}).
+		Limit(1).
+		ToSql()
+
+	if err != nil {
+		return nil, err
+	}
+
+	var user User
+	err = p.pgx.QueryRow(ctx, query, args).Scan(
+		&user.ID,
+		&user.Name,
+		&user.DisplayName,
+		&user.Email,
+		&user.Password,
+		&user.IsVerified,
 		&user.AvatarUrl,
 		&user.CreatedAt,
 		&user.EditedAt,

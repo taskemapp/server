@@ -7,15 +7,18 @@ import (
 )
 
 func main() {
-	app := fx.New(
+	a := fx.New(
 		app.App,
 	)
 
-	app.Run()
+	a.Run()
 
-	defer app.Stop(context.Background())
+	defer func(app *fx.App, ctx context.Context) {
+		err := app.Stop(ctx)
+		if err != nil {
 
-	app.Run()
+		}
+	}(a, context.Background())
 
-	<-app.Done()
+	<-a.Done()
 }

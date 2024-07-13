@@ -2,6 +2,8 @@ package user
 
 import (
 	"context"
+	"errors"
+	"github.com/jackc/pgx/v5"
 	"time"
 
 	"github.com/Masterminds/squirrel"
@@ -94,6 +96,9 @@ func (p *Pgx) FindMany(ctx context.Context, opts FindManyOpts) (*FindManyResult,
 
 	rows, err := p.pgx.Query(ctx, query, args...)
 	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, ErrNotFound
+		}
 		return nil, err
 	}
 
@@ -163,6 +168,9 @@ func (p *Pgx) FindByID(ctx context.Context, userID uuid.UUID) (*User, error) {
 		&user.AvatarUrl,
 	)
 	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, ErrNotFound
+		}
 		return nil, err
 	}
 
@@ -254,6 +262,9 @@ func (p *Pgx) FindByName(ctx context.Context, name string) (*User, error) {
 		&user.EditedAt,
 	)
 	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, ErrNotFound
+		}
 		return nil, err
 	}
 
@@ -285,6 +296,9 @@ func (p *Pgx) FindByEmail(ctx context.Context, email string) (*User, error) {
 		&user.EditedAt,
 	)
 	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, ErrNotFound
+		}
 		return nil, err
 	}
 

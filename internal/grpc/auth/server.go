@@ -2,8 +2,12 @@ package auth
 
 import (
 	"context"
+	"errors"
 	"go.uber.org/fx"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/emptypb"
+	"taskem/internal/repositories/user"
 	"taskem/internal/service/auth"
 	authv1 "taskem/tools/gen/grpc/v1/auth"
 )
@@ -33,7 +37,16 @@ func (s *Server) Login(
 			Email:    req.Email,
 			Password: req.Password,
 		})
+
 	if err != nil {
+		switch {
+		case errors.Is(err, user.ErrNotFound):
+			return nil, status.Error(codes.NotFound, "Not found")
+		case errors.Is(err, auth.ErrTokenGen):
+			return nil, status.Error(codes.Internal, "Token generate failed")
+		case errors.Is(err, auth.ErrPwdMatch):
+			return nil, status.Error(codes.InvalidArgument, "Wrong password")
+		}
 		return nil, err
 	}
 
@@ -56,7 +69,7 @@ func (s *Server) SignUp(
 			Password: req.Password,
 		})
 	if err != nil {
-		return nil, err
+		return nil, status.Error(codes.Internal, "Internal server error")
 	}
 
 	return &emptypb.Empty{}, nil

@@ -142,6 +142,54 @@ func (p Pgx) FindByID(ctx context.Context, taskID uuid.UUID) (*Task, error) {
 	return &task, nil
 }
 
+func (p Pgx) FindByStatusAndUserID(ctx context.Context, userID uuid.UUID, status string) (*[]Task, error) {
+	query, args, err := squirrel.StatementBuilder.PlaceholderFormat(squirrel.Dollar).
+		Select(selectTaskFields...).
+		From(tableName).
+		Where(squirrel.Eq{
+			"assigned_user_id": userID,
+			"status":           status,
+		}).
+		Limit(1).
+		ToSql()
+
+	if err != nil {
+		return nil, err
+	}
+
+	tasks := make([]Task, 0)
+
+	rows, err := p.pgx.Query(ctx, query, args...)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, ErrNotFound
+		}
+		return nil, err
+	}
+
+	for rows.Next() {
+		task := Task{}
+		err = rows.Scan(
+			&task.ID,
+			&task.Name,
+			&task.Description,
+			&task.Status,
+			&task.TeamID,
+			&task.AssignedUserID,
+			&task.Creator,
+			&task.CreatedAt,
+			&task.EditedAt,
+			&task.EndAt,
+		)
+		if err != nil {
+			return nil, err
+		}
+		tasks = append(tasks, task)
+	}
+
+	return &tasks, nil
+}
+
 func (p Pgx) FindMany(ctx context.Context, opts FindManyOpts) (*FindManyResult, error) {
 	limit := opts.PerPage
 	if limit == 0 {
@@ -282,8 +330,73 @@ func (p Pgx) FindManyBelongToTeam(ctx context.Context, teamID uuid.UUID, opts Fi
 }
 
 func (p Pgx) FindManyBelongToUser(ctx context.Context, userID uuid.UUID, opts FindManyOpts) (*FindManyResult, error) {
-	//TODO implement me
-	panic("implement me")
+	limit := opts.PerPage
+	if limit == 0 {
+		limit = 100
+	}
+	offset := opts.Page * limit
+
+	query, args, err := squirrel.StatementBuilder.PlaceholderFormat(squirrel.Dollar).
+		Select(selectTaskFields...).
+		From(tableName).
+		Where(squirrel.Eq{"assigned_user_id": userID}).
+		Offset(uint64(offset)).
+		Limit(uint64(limit)).
+		ToSql()
+	if err != nil {
+		return nil, err
+	}
+
+	rows, err := p.pgx.Query(ctx, query, args...)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, ErrNotFound
+		}
+		return nil, err
+	}
+
+	defer rows.Close()
+
+	tasks := make([]Task, 0)
+	for rows.Next() {
+		task := Task{}
+		err = rows.Scan(
+			&task.ID,
+			&task.Name,
+			&task.Description,
+			&task.Status,
+			&task.TeamID,
+			&task.AssignedUserID,
+			&task.Creator,
+			&task.CreatedAt,
+			&task.EditedAt,
+			&task.EndAt,
+		)
+		if err != nil {
+			return nil, err
+		}
+		tasks = append(tasks, task)
+	}
+
+	totalQuery, totalArgs, err := squirrel.StatementBuilder.PlaceholderFormat(squirrel.Dollar).
+		Select("COUNT(*)").
+		From(tableName).
+		ToSql()
+	if err != nil {
+		return nil, err
+	}
+
+	var total int
+	err = p.pgx.QueryRow(ctx, totalQuery, totalArgs...).Scan(&total)
+	if err != nil {
+		return nil, err
+	}
+
+	return &FindManyResult{
+		Tasks:       tasks,
+		Total:       total,
+		HasNextPage: total > offset+limit,
+	}, nil
 }
 
 func (p Pgx) Update(ctx context.Context, taskID uuid.UUID, opts UpdateOpts) (*Task, error) {

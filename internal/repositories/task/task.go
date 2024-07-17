@@ -9,9 +9,10 @@ import (
 type Repository interface {
 	Create(ctx context.Context, opts CreateOpts) (*Task, error)
 	FindByID(ctx context.Context, taskID uuid.UUID) (*Task, error)
+	FindByStatusAndUserID(ctx context.Context, userID uuid.UUID, status string) (*[]Task, error)
 	FindMany(ctx context.Context, opts FindManyOpts) (*FindManyResult, error)
 	FindManyBelongToTeam(ctx context.Context, teamID uuid.UUID, opts FindManyOpts) (*FindManyResult, error)
-	FindManyBelongToUser(ctx context.Context, userID uuid.UUID, opts FindManyOpts) ([]Task, error)
+	FindManyBelongToUser(ctx context.Context, userID uuid.UUID, opts FindManyOpts) (*FindManyResult, error)
 	Update(ctx context.Context, taskID uuid.UUID, opts UpdateOpts) (*Task, error)
 }
 
@@ -34,7 +35,8 @@ type UpdateOpts struct {
 }
 
 type FindManyOpts struct {
-	Status string
+	Page    int
+	PerPage int
 }
 
 type FindManyResult struct {

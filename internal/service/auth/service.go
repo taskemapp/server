@@ -4,9 +4,9 @@ import (
 	"context"
 	"github.com/alexedwards/argon2id"
 	"go.uber.org/fx"
-	"taskem/internal/config"
-	"taskem/internal/pkg/jwt"
-	"taskem/internal/repositories/user"
+	"taskem-server/internal/config"
+	"taskem-server/internal/pkg/jwt"
+	"taskem-server/internal/repositories/user"
 )
 
 type Opts struct {

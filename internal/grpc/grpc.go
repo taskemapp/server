@@ -10,8 +10,8 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
-	authserver "taskem/internal/grpc/auth"
-	v1 "taskem/tools/gen/grpc/v1"
+	authserver "taskem-server/internal/grpc/auth"
+	v1 "taskem-server/tools/gen/grpc/v1"
 )
 
 type Opts struct {

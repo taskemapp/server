@@ -13,11 +13,11 @@ import (
 	"net"
 	"os"
 	"path/filepath"
-	"taskem/internal/config"
-	grpcsrv "taskem/internal/grpc"
-	authserver "taskem/internal/grpc/auth"
-	"taskem/internal/repositories/user"
-	authservice "taskem/internal/service/auth"
+	"taskem-server/internal/config"
+	grpcsrv "taskem-server/internal/grpc"
+	authserver "taskem-server/internal/grpc/auth"
+	"taskem-server/internal/repositories/user"
+	authservice "taskem-server/internal/service/auth"
 )
 
 const (

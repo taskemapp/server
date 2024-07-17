@@ -8,9 +8,9 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/emptypb"
-	"taskem/internal/repositories/user"
-	"taskem/internal/service/auth"
-	"taskem/tools/gen/grpc/v1"
+	"taskem-server/internal/repositories/user"
+	"taskem-server/internal/service/auth"
+	"taskem-server/tools/gen/grpc/v1"
 )
 
 type Opts struct {

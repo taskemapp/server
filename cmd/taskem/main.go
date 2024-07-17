@@ -3,7 +3,7 @@ package main
 import (
 	"context"
 	"go.uber.org/fx"
-	"taskem/internal/app"
+	"taskem-server/internal/app"
 )
 
 func main() {

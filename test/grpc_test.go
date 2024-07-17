@@ -7,8 +7,8 @@ import (
 	"github.com/stretchr/testify/require"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
-	"taskem/internal/config"
-	v1 "taskem/tools/gen/grpc/v1"
+	"taskem-server/internal/config"
+	v1 "taskem-server/tools/gen/grpc/v1"
 	"testing"
 )
 

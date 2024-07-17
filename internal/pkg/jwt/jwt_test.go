@@ -1,11 +1,10 @@
-package test
+package jwt
 
 import (
 	"github.com/brianvoe/gofakeit/v7"
 	jwt2 "github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/require"
-	"taskem/internal/pkg/jwt"
 	"testing"
 	"time"
 )
@@ -13,24 +12,24 @@ import (
 func TestNewToken(t *testing.T) {
 	tests := []struct {
 		name        string
-		opts        jwt.Opts
+		opts        Opts
 		failed      bool
 		expectedErr error
 	}{
 		{
 			name: "",
-			opts: jwt.Opts{
+			opts: Opts{
 				Email:    gofakeit.Email(),
 				Secret:   "secret",
 				Duration: time.Second * 10,
 				Id:       uuid.New(),
 			},
 			failed:      true,
-			expectedErr: jwt.ErrDuration,
+			expectedErr: ErrDuration,
 		},
 		{
 			name: "",
-			opts: jwt.Opts{
+			opts: Opts{
 				Email:    gofakeit.Email(),
 				Secret:   "secret",
 				Duration: time.Minute,
@@ -40,7 +39,7 @@ func TestNewToken(t *testing.T) {
 		},
 		{
 			name: "",
-			opts: jwt.Opts{
+			opts: Opts{
 				Email:    gofakeit.Email(),
 				Secret:   "secret",
 				Duration: time.Hour,
@@ -49,13 +48,13 @@ func TestNewToken(t *testing.T) {
 		},
 		{
 			name: "",
-			opts: jwt.Opts{
+			opts: Opts{
 				Email:    gofakeit.Email(),
 				Secret:   "",
 				Duration: time.Hour,
 			},
 			failed:      true,
-			expectedErr: jwt.ErrMissingSecret,
+			expectedErr: ErrMissingSecret,
 		},
 	}
 
@@ -63,7 +62,7 @@ func TestNewToken(t *testing.T) {
 		t.Run(test.name, func(t *testing.T) {
 			t.Parallel()
 
-			token, err := jwt.NewToken(test.opts)
+			token, err := NewToken(test.opts)
 
 			if !test.failed {
 				require.Nil(t, err)

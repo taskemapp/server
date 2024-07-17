@@ -183,6 +183,11 @@ func (p *Pgx) FindByID(ctx context.Context, userID uuid.UUID) (*User, error) {
 	return &user, nil
 }
 
+func (p *Pgx) FindManyBelongToTeam(ctx context.Context, teamID uuid.UUID, opts FindManyOpts) (*FindManyResult, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
 func (p *Pgx) Create(ctx context.Context, opts CreateOpts) (*User, error) {
 	fields := []string{
 		"name",

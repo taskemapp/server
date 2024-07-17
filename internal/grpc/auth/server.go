@@ -4,34 +4,40 @@ import (
 	"context"
 	"errors"
 	"go.uber.org/fx"
+	"go.uber.org/zap"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/emptypb"
 	"taskem/internal/repositories/user"
 	"taskem/internal/service/auth"
-	authv1 "taskem/tools/gen/grpc/v1/auth"
+	"taskem/tools/gen/grpc/v1"
 )
 
 type Opts struct {
 	fx.In
-	Auth auth.Auth
+	Auth   auth.Auth
+	Logger *zap.Logger
 }
 
 type Server struct {
-	authv1.UnimplementedAuthServer
-	Auth auth.Auth
+	v1.UnimplementedAuthServer
+	auth   auth.Auth
+	logger *zap.Logger
 }
 
 func New(opts Opts) *Server {
-	return &Server{Auth: opts.Auth}
+	return &Server{
+		auth:   opts.Auth,
+		logger: opts.Logger,
+	}
 }
 
 func (s *Server) Login(
 	ctx context.Context,
-	req *authv1.LoginRequest,
-) (*authv1.LoginResponse, error) {
+	req *v1.LoginRequest,
+) (*v1.LoginResponse, error) {
 
-	resp, err := s.Auth.Login(
+	resp, err := s.auth.Login(
 		ctx,
 		auth.LoginOpts{
 			Email:    req.Email,
@@ -39,6 +45,7 @@ func (s *Server) Login(
 		})
 
 	if err != nil {
+		s.logger.Sugar().Error(err)
 		switch {
 		case errors.Is(err, user.ErrNotFound):
 			return nil, status.Error(codes.NotFound, "Not found")
@@ -50,18 +57,19 @@ func (s *Server) Login(
 		return nil, err
 	}
 
-	return &authv1.LoginResponse{
+	return &v1.LoginResponse{
 		Token:        resp.Token,
 		RefreshToken: resp.RefreshToken,
+		TokenType:    resp.TokenType,
 	}, nil
 }
 
 func (s *Server) SignUp(
 	ctx context.Context,
-	req *authv1.SignupRequest,
+	req *v1.SignupRequest,
 ) (*emptypb.Empty, error) {
 
-	err := s.Auth.Registration(
+	err := s.auth.Registration(
 		ctx,
 		auth.RegistrationOpts{
 			Email:    req.Email,
@@ -69,7 +77,8 @@ func (s *Server) SignUp(
 			Password: req.Password,
 		})
 	if err != nil {
-		return nil, status.Error(codes.Internal, "Internal server error")
+		s.logger.Sugar().Error(err)
+		return nil, err
 	}
 
 	return &emptypb.Empty{}, nil

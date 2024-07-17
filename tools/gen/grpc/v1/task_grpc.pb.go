@@ -2,9 +2,9 @@
 // versions:
 // - protoc-gen-go-grpc v1.4.0
 // - protoc             v5.27.2
-// source: task.proto
+// source: v1/task.proto
 
-package taskv1
+package v1
 
 import (
 	context "context"
@@ -20,13 +20,13 @@ import (
 const _ = grpc.SupportPackageIsVersion8
 
 const (
-	Task_Create_FullMethodName        = "/task.Task/Create"
-	Task_GetAll_FullMethodName        = "/task.Task/GetAll"
-	Task_GetAllForTeam_FullMethodName = "/task.Task/GetAllForTeam"
-	Task_GetAllForUser_FullMethodName = "/task.Task/GetAllForUser"
-	Task_Get_FullMethodName           = "/task.Task/Get"
-	Task_Assign_FullMethodName        = "/task.Task/Assign"
-	Task_Complete_FullMethodName      = "/task.Task/Complete"
+	Task_Create_FullMethodName        = "/v1.task.Task/Create"
+	Task_GetAll_FullMethodName        = "/v1.task.Task/GetAll"
+	Task_GetAllForTeam_FullMethodName = "/v1.task.Task/GetAllForTeam"
+	Task_GetAllForUser_FullMethodName = "/v1.task.Task/GetAllForUser"
+	Task_Get_FullMethodName           = "/v1.task.Task/Get"
+	Task_Assign_FullMethodName        = "/v1.task.Task/Assign"
+	Task_Complete_FullMethodName      = "/v1.task.Task/Complete"
 )
 
 // TaskClient is the client API for Task service.
@@ -302,7 +302,7 @@ func _Task_Complete_Handler(srv interface{}, ctx context.Context, dec func(inter
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var Task_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "task.Task",
+	ServiceName: "v1.task.Task",
 	HandlerType: (*TaskServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
@@ -335,5 +335,5 @@ var Task_ServiceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "task.proto",
+	Metadata: "v1/task.proto",
 }

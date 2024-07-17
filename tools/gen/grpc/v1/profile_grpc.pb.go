@@ -2,9 +2,9 @@
 // versions:
 // - protoc-gen-go-grpc v1.4.0
 // - protoc             v5.27.2
-// source: profile.proto
+// source: v1/profile.proto
 
-package profilev1
+package v1
 
 import (
 	context "context"
@@ -20,8 +20,8 @@ import (
 const _ = grpc.SupportPackageIsVersion8
 
 const (
-	Profile_AddOrUpdateAvatar_FullMethodName = "/profile.Profile/AddOrUpdateAvatar"
-	Profile_GetProfile_FullMethodName        = "/profile.Profile/GetProfile"
+	Profile_AddOrUpdateAvatar_FullMethodName = "/v1.profile.Profile/AddOrUpdateAvatar"
+	Profile_GetProfile_FullMethodName        = "/v1.profile.Profile/GetProfile"
 )
 
 // ProfileClient is the client API for Profile service.
@@ -132,7 +132,7 @@ func _Profile_GetProfile_Handler(srv interface{}, ctx context.Context, dec func(
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var Profile_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "profile.Profile",
+	ServiceName: "v1.profile.Profile",
 	HandlerType: (*ProfileServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
@@ -145,5 +145,5 @@ var Profile_ServiceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "profile.proto",
+	Metadata: "v1/profile.proto",
 }

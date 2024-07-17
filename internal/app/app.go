@@ -6,10 +6,13 @@ import (
 	"fmt"
 	"github.com/jackc/pgx/v5/pgxpool"
 	_ "github.com/jackc/pgx/v5/stdlib"
+	"github.com/pressly/goose/v3"
 	"go.uber.org/fx"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"net"
+	"os"
+	"path/filepath"
 	"taskem/internal/config"
 	grpcsrv "taskem/internal/grpc"
 	authserver "taskem/internal/grpc/auth"
@@ -39,22 +42,21 @@ var App = fx.Options(
 
 	fx.Invoke(
 		func(p *pgxpool.Pool, c config.Config) error {
-			//if err := goose.SetDialect("pgx"); err != nil {
-			//	return err
-			//}
+			if err := goose.SetDialect("pgx"); err != nil {
+				return err
+			}
 			db, err := sql.Open("pgx", c.PostgresUrl)
 			if err != nil {
 				return err
 			}
 			defer db.Close()
 
-			//wd, err := os.Getwd()
-			//if err != nil {
-			//	return err
-			//}
+			wd, err := os.Getwd()
+			if err != nil {
+				return err
+			}
 
-			return nil
-			//return goose.Up(db, filepath.Join(wd, "migrations"))
+			return goose.Up(db, filepath.Join(wd, "migrations"))
 		},
 		func(lc fx.Lifecycle, log *zap.Logger, c config.Config, srv *grpc.Server) {
 			lc.Append(

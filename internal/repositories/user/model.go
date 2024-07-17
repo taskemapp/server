@@ -11,8 +11,8 @@ type User struct {
 	DisplayName string
 	Email       string
 	Password    string
-	IsVerified  string
-	AvatarUrl   string
+	IsVerified  bool
+	AvatarUrl   *string
 	CreatedAt   time.Time
-	EditedAt    time.Time
+	EditedAt    *time.Time
 }

@@ -6,13 +6,14 @@ import (
 )
 
 type Repository interface {
-	Create(ctx context.Context, opts CreateOpts) (user *User, err error)
-	FindByID(ctx context.Context, userID uuid.UUID) (user *User, err error)
-	FindByName(ctx context.Context, name string) (user *User, err error)
-	FindByEmail(ctx context.Context, email string) (user *User, err error)
-	Update(ctx context.Context, userID uuid.UUID, opts UpdateOpts) (user *User, err error)
+	Create(ctx context.Context, opts CreateOpts) (*User, error)
+	FindByID(ctx context.Context, userID uuid.UUID) (*User, error)
+	FindByName(ctx context.Context, name string) (*User, error)
+	FindByEmail(ctx context.Context, email string) (*User, error)
+	FindManyBelongToTeam(ctx context.Context, teamID uuid.UUID, opts FindManyOpts) (*FindManyResult, error)
+	FindMany(ctx context.Context, opts FindManyOpts) (*FindManyResult, error)
+	Update(ctx context.Context, userID uuid.UUID, opts UpdateOpts) (*User, error)
 	DeleteAccount(ctx context.Context, userID uuid.UUID) error
-	FindMany(ctx context.Context, opts FindManyOpts) (res *FindManyResult, err error)
 }
 
 type FindManyOpts struct {
@@ -31,7 +32,6 @@ type CreateOpts struct {
 	DisplayName string
 	Email       string
 	Password    string
-	AvatarUrl   *string
 }
 
 type UpdateOpts struct {

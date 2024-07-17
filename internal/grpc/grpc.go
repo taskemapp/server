@@ -11,7 +11,7 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	authserver "taskem/internal/grpc/auth"
-	authv1 "taskem/tools/gen/grpc/v1/auth"
+	v1 "taskem/tools/gen/grpc/v1"
 )
 
 type Opts struct {
@@ -51,7 +51,7 @@ func New(opts Opts) App {
 		),
 	)
 
-	authv1.RegisterAuthServer(srv, opts.AuthServer)
+	v1.RegisterAuthServer(srv, opts.AuthServer)
 
 	return App{Srv: srv}
 }

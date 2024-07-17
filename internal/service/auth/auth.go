@@ -15,6 +15,7 @@ type LoginOpts struct {
 type LoginResponse struct {
 	Token        string
 	RefreshToken string
+	TokenType    string
 }
 
 type RegistrationOpts struct {

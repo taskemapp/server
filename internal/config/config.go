@@ -3,6 +3,9 @@ package config
 import (
 	"github.com/joho/godotenv"
 	"github.com/kelseyhightower/envconfig"
+	"os"
+	"path/filepath"
+	"time"
 )
 
 type Config struct {
@@ -10,8 +13,13 @@ type Config struct {
 
 	GrpcPort int `envconfig:"GRPC_PORT" default:"50051"`
 
-	PostgresUrl string `envconfig:"POSTGRES_URL"`
-	RedisURL    string `envconfig:"REDIS_URL"`
+	TokenTtl time.Duration `envconfig:"TOKEN_TTL" default:"1h"`
+	// RefreshTokenTtl default value is 168 hours = 1 week
+	RefreshTokenTtl time.Duration `envconfig:"REFRESH_TOKEN_TTL" default:"168h"`
+	TokenSecret     string        `envconfig:"TOKEN_SECRET" required:"true"`
+
+	PostgresUrl string `envconfig:"POSTGRES_URL" required:"true"`
+	RedisURL    string `envconfig:"REDIS_URL" required:"true" ignored:"true"`
 
 	S3Host        string `envconfig:"S3_HOST"`
 	S3AccessToken string `envconfig:"S3_ACCESS_TOKEN"`
@@ -23,11 +31,14 @@ type Config struct {
 func New() (Config, error) {
 	cfg := Config{}
 
-	err := godotenv.Load()
-
+	wd, err := os.Getwd()
 	if err != nil {
 		return cfg, err
 	}
+
+	envPath := filepath.Join(wd, ".env")
+
+	_ = godotenv.Load(envPath)
 
 	if err := envconfig.Process("", &cfg); err != nil {
 		return cfg, err

@@ -2,9 +2,9 @@
 // versions:
 // - protoc-gen-go-grpc v1.4.0
 // - protoc             v5.27.2
-// source: file.proto
+// source: v1/file.proto
 
-package filev1
+package v1
 
 import (
 	context "context"
@@ -20,8 +20,8 @@ import (
 const _ = grpc.SupportPackageIsVersion8
 
 const (
-	FileService_UploadFile_FullMethodName = "/file.FileService/UploadFile"
-	FileService_DeleteFile_FullMethodName = "/file.FileService/DeleteFile"
+	FileService_UploadFile_FullMethodName = "/v1.file.FileService/UploadFile"
+	FileService_DeleteFile_FullMethodName = "/v1.file.FileService/DeleteFile"
 )
 
 // FileServiceClient is the client API for FileService service.
@@ -132,7 +132,7 @@ func _FileService_DeleteFile_Handler(srv interface{}, ctx context.Context, dec f
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var FileService_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "file.FileService",
+	ServiceName: "v1.file.FileService",
 	HandlerType: (*FileServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
@@ -145,5 +145,5 @@ var FileService_ServiceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "file.proto",
+	Metadata: "v1/file.proto",
 }

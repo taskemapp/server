@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"github.com/jackc/pgx/v5"
+	"go.uber.org/zap"
 	"time"
 
 	"github.com/Masterminds/squirrel"
@@ -16,16 +17,19 @@ const tableName = "users"
 
 type Opts struct {
 	fx.In
-	Pgx *pgxpool.Pool
+	Pgx    *pgxpool.Pool
+	Logger *zap.Logger
 }
 
 type Pgx struct {
-	pgx *pgxpool.Pool
+	pgx    *pgxpool.Pool
+	logger *zap.Logger
 }
 
 func NewPgx(opts Opts) (*Pgx, error) {
 	return &Pgx{
-		pgx: opts.Pgx,
+		pgx:    opts.Pgx,
+		logger: opts.Logger,
 	}, nil
 }
 
@@ -60,6 +64,8 @@ func (p *Pgx) Update(ctx context.Context, userID uuid.UUID, opts UpdateOpts) (*U
 		updateMap["is_verified"] = *opts.IsVerified
 	}
 
+	updateMap["edited_at"] = time.Now()
+
 	query, args, err := squirrel.StatementBuilder.PlaceholderFormat(squirrel.Dollar).
 		Update(tableName).
 		SetMap(updateMap).
@@ -69,7 +75,7 @@ func (p *Pgx) Update(ctx context.Context, userID uuid.UUID, opts UpdateOpts) (*U
 		return nil, err
 	}
 
-	_, err = p.pgx.Exec(ctx, query, args)
+	_, err = p.pgx.Exec(ctx, query, args...)
 	if err != nil {
 		return nil, err
 	}
@@ -158,7 +164,7 @@ func (p *Pgx) FindByID(ctx context.Context, userID uuid.UUID) (*User, error) {
 	}
 
 	var user User
-	err = p.pgx.QueryRow(ctx, query, args).Scan(
+	err = p.pgx.QueryRow(ctx, query, args...).Scan(
 		&user.ID,
 		&user.Name,
 		&user.DisplayName,
@@ -184,7 +190,6 @@ func (p *Pgx) Create(ctx context.Context, opts CreateOpts) (*User, error) {
 		"email",
 		"password",
 		"is_verified",
-		"avatar_url",
 		"created_at",
 	}
 
@@ -197,9 +202,10 @@ func (p *Pgx) Create(ctx context.Context, opts CreateOpts) (*User, error) {
 			opts.Email,
 			opts.Password,
 			false,
-			opts.AvatarUrl,
 			time.Now(),
-		).ToSql()
+		).
+		Suffix("RETURNING *").
+		ToSql()
 	if err != nil {
 		return nil, err
 	}
@@ -218,7 +224,7 @@ func (p *Pgx) Create(ctx context.Context, opts CreateOpts) (*User, error) {
 	}()
 
 	var user User
-	err = tx.QueryRow(ctx, query, args).Scan(
+	err = tx.QueryRow(ctx, query, args...).Scan(
 		&user.ID,
 		&user.Name,
 		&user.DisplayName,
@@ -250,7 +256,7 @@ func (p *Pgx) FindByName(ctx context.Context, name string) (*User, error) {
 	}
 
 	var user User
-	err = p.pgx.QueryRow(ctx, query, args).Scan(
+	err = p.pgx.QueryRow(ctx, query, args...).Scan(
 		&user.ID,
 		&user.Name,
 		&user.DisplayName,
@@ -284,7 +290,7 @@ func (p *Pgx) FindByEmail(ctx context.Context, email string) (*User, error) {
 	}
 
 	var user User
-	err = p.pgx.QueryRow(ctx, query, args).Scan(
+	err = p.pgx.QueryRow(ctx, query, args...).Scan(
 		&user.ID,
 		&user.Name,
 		&user.DisplayName,

@@ -2,9 +2,9 @@
 // versions:
 // - protoc-gen-go-grpc v1.4.0
 // - protoc             v5.27.2
-// source: auth.proto
+// source: v1/auth.proto
 
-package authv1
+package v1
 
 import (
 	context "context"
@@ -20,9 +20,9 @@ import (
 const _ = grpc.SupportPackageIsVersion8
 
 const (
-	Auth_SignUp_FullMethodName = "/auth.v1.Auth/SignUp"
-	Auth_Login_FullMethodName  = "/auth.v1.Auth/Login"
-	Auth_Logout_FullMethodName = "/auth.v1.Auth/Logout"
+	Auth_SignUp_FullMethodName = "/v1.auth.Auth/SignUp"
+	Auth_Login_FullMethodName  = "/v1.auth.Auth/Login"
+	Auth_Logout_FullMethodName = "/v1.auth.Auth/Logout"
 )
 
 // AuthClient is the client API for Auth service.
@@ -166,7 +166,7 @@ func _Auth_Logout_Handler(srv interface{}, ctx context.Context, dec func(interfa
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var Auth_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "auth.v1.Auth",
+	ServiceName: "v1.auth.Auth",
 	HandlerType: (*AuthServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
@@ -183,5 +183,5 @@ var Auth_ServiceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "auth.proto",
+	Metadata: "v1/auth.proto",
 }

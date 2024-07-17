@@ -2,9 +2,9 @@
 // versions:
 // - protoc-gen-go-grpc v1.4.0
 // - protoc             v5.27.2
-// source: team.proto
+// source: v1/team.proto
 
-package teamv1
+package v1
 
 import (
 	context "context"
@@ -20,14 +20,14 @@ import (
 const _ = grpc.SupportPackageIsVersion8
 
 const (
-	Team_Get_FullMethodName           = "/team.Team/Get"
-	Team_GetUserTeams_FullMethodName  = "/team.Team/GetUserTeams"
-	Team_GetAllCanJoin_FullMethodName = "/team.Team/GetAllCanJoin"
-	Team_Create_FullMethodName        = "/team.Team/Create"
-	Team_Join_FullMethodName          = "/team.Team/Join"
-	Team_GetRoles_FullMethodName      = "/team.Team/GetRoles"
-	Team_ChangeRole_FullMethodName    = "/team.Team/ChangeRole"
-	Team_Leave_FullMethodName         = "/team.Team/Leave"
+	Team_Get_FullMethodName           = "/v1.team.Team/Get"
+	Team_GetUserTeams_FullMethodName  = "/v1.team.Team/GetUserTeams"
+	Team_GetAllCanJoin_FullMethodName = "/v1.team.Team/GetAllCanJoin"
+	Team_Create_FullMethodName        = "/v1.team.Team/Create"
+	Team_Join_FullMethodName          = "/v1.team.Team/Join"
+	Team_GetRoles_FullMethodName      = "/v1.team.Team/GetRoles"
+	Team_ChangeRole_FullMethodName    = "/v1.team.Team/ChangeRole"
+	Team_Leave_FullMethodName         = "/v1.team.Team/Leave"
 )
 
 // TeamClient is the client API for Team service.
@@ -336,7 +336,7 @@ func _Team_Leave_Handler(srv interface{}, ctx context.Context, dec func(interfac
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var Team_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "team.Team",
+	ServiceName: "v1.team.Team",
 	HandlerType: (*TeamServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
@@ -373,5 +373,5 @@ var Team_ServiceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "team.proto",
+	Metadata: "v1/team.proto",
 }

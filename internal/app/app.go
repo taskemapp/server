@@ -10,11 +10,12 @@ import (
 	"go.uber.org/fx"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/reflection"
 	"net"
 	"os"
 	"path/filepath"
+	grpcsrv "taskem-server/internal/app/grpc"
 	"taskem-server/internal/config"
-	grpcsrv "taskem-server/internal/grpc"
 	authserver "taskem-server/internal/grpc/auth"
 	"taskem-server/internal/repositories/user"
 	authservice "taskem-server/internal/service/auth"
@@ -68,6 +69,8 @@ var App = fx.Options(
 						if err != nil {
 							return err
 						}
+
+						reflection.Register(srv)
 
 						go func() {
 							err = srv.Serve(l)

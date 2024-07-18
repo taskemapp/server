@@ -36,6 +36,13 @@ func (s *Server) Login(
 	ctx context.Context,
 	req *v1.LoginRequest,
 ) (*v1.LoginResponse, error) {
+	if req.Email == "" {
+		return nil, status.Error(codes.InvalidArgument, "Missing argument: email")
+	}
+
+	if req.Password == "" {
+		return nil, status.Error(codes.InvalidArgument, "Missing argument: password")
+	}
 
 	resp, err := s.auth.Login(
 		ctx,
@@ -68,6 +75,17 @@ func (s *Server) SignUp(
 	ctx context.Context,
 	req *v1.SignupRequest,
 ) (*emptypb.Empty, error) {
+	if req.UserName == "" {
+		return nil, status.Error(codes.InvalidArgument, "Missing argument: user_name")
+	}
+
+	if req.Email == "" {
+		return nil, status.Error(codes.InvalidArgument, "Missing argument: email")
+	}
+
+	if req.Password == "" {
+		return nil, status.Error(codes.InvalidArgument, "Missing argument: password")
+	}
 
 	err := s.auth.Registration(
 		ctx,

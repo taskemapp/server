@@ -11,7 +11,7 @@ create table users
     display_name varchar(255)        not null check (length(display_name) > 3),
     email        varchar(255) unique not null,
     password     varchar(255)        not null,
-    is_verified  bool                    not null default false,
+    is_verified  bool                not null default false,
     avatar_url   varchar(255),
     created_at   timestamp           not null default now(),
     edited_at    timestamp check (edited_at >= created_at)

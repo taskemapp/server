@@ -1,7 +1,7 @@
 package jwt
 
 import (
-	"errors"
+	"github.com/go-faster/errors"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
 	"time"
@@ -49,4 +49,23 @@ func NewToken(opts Opts) (token string, err error) {
 	}
 
 	return tokenString, nil
+}
+
+func GetPayload(token string, secret string) (*jwt.MapClaims, error) {
+	parsed, err := jwt.Parse(token, func(token *jwt.Token) (interface{}, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, errors.New("Wrong token signing method")
+		}
+
+		return []byte(secret), nil
+	})
+	if err != nil {
+		return nil, errors.Wrap(err, "Failed to parse jwt token")
+	}
+
+	claims, ok := parsed.Claims.(jwt.MapClaims)
+	if !ok {
+		return nil, errors.Wrap(err, "Failed to get claims from token")
+	}
+	return &claims, nil
 }

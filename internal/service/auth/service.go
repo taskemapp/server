@@ -15,20 +15,20 @@ type Opts struct {
 	Config   config.Config
 }
 
-type Service struct {
-	UserRepo user.Repository
-	Config   config.Config
+type Auth struct {
+	userRepo user.Repository
+	config   config.Config
 }
 
-func New(opts Opts) *Service {
-	return &Service{
-		UserRepo: opts.UserRepo,
-		Config:   opts.Config,
+func New(opts Opts) *Auth {
+	return &Auth{
+		userRepo: opts.UserRepo,
+		config:   opts.Config,
 	}
 }
 
-func (s *Service) Login(ctx context.Context, opts LoginOpts) (resp *LoginResponse, err error) {
-	u, err := s.UserRepo.FindByEmail(ctx, opts.Email)
+func (a *Auth) Login(ctx context.Context, opts LoginOpts) (resp *LoginResponse, err error) {
+	u, err := a.userRepo.FindByEmail(ctx, opts.Email)
 	if err != nil {
 		return nil, err
 	}
@@ -44,9 +44,9 @@ func (s *Service) Login(ctx context.Context, opts LoginOpts) (resp *LoginRespons
 
 	token, err := jwt.NewToken(jwt.Opts{
 		Id:       u.ID,
-		Duration: s.Config.TokenTtl,
+		Duration: a.config.TokenTtl,
 		Email:    u.Email,
-		Secret:   s.Config.TokenSecret,
+		Secret:   a.config.TokenSecret,
 	})
 	if err != nil {
 		return nil, err
@@ -54,8 +54,8 @@ func (s *Service) Login(ctx context.Context, opts LoginOpts) (resp *LoginRespons
 
 	refresh, err := jwt.NewToken(jwt.Opts{
 		Id:       u.ID,
-		Duration: s.Config.RefreshTokenTtl,
-		Secret:   s.Config.TokenSecret,
+		Duration: a.config.RefreshTokenTtl,
+		Secret:   a.config.TokenSecret,
 	})
 
 	if err != nil {
@@ -69,13 +69,13 @@ func (s *Service) Login(ctx context.Context, opts LoginOpts) (resp *LoginRespons
 	}, nil
 }
 
-func (s *Service) Registration(ctx context.Context, opts RegistrationOpts) error {
+func (a *Auth) Registration(ctx context.Context, opts RegistrationOpts) error {
 	passwd, err := argon2id.CreateHash(opts.Password, argon2id.DefaultParams)
 	if err != nil {
 		return ErrPwdHash
 	}
 
-	_, err = s.UserRepo.Create(ctx, user.CreateOpts{
+	_, err = a.userRepo.Create(ctx, user.CreateOpts{
 		Email:       opts.Email,
 		Name:        opts.Name,
 		Password:    passwd,

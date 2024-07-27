@@ -2,7 +2,7 @@ package auth
 
 import "context"
 
-type Auth interface {
+type Service interface {
 	Login(ctx context.Context, opts LoginOpts) (resp *LoginResponse, err error)
 	Registration(ctx context.Context, opts RegistrationOpts) error
 }

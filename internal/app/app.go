@@ -17,6 +17,8 @@ import (
 	grpcsrv "taskem-server/internal/app/grpc"
 	"taskem-server/internal/config"
 	authserver "taskem-server/internal/grpc/auth"
+	"taskem-server/internal/repositories/task"
+	"taskem-server/internal/repositories/team"
 	"taskem-server/internal/repositories/user"
 	authservice "taskem-server/internal/service/auth"
 )
@@ -33,10 +35,12 @@ var App = fx.Options(
 
 	fx.Provide(
 		fx.Annotate(user.NewPgx, fx.As(new(user.Repository))),
+		fx.Annotate(task.NewPgx, fx.As(new(task.Repository))),
+		fx.Annotate(team.NewPgx, fx.As(new(team.Repository))),
 	),
 
 	fx.Provide(
-		fx.Annotate(authservice.New, fx.As(new(authservice.Auth))),
+		fx.Annotate(authservice.New, fx.As(new(authservice.Service))),
 	),
 	fx.Provide(authserver.New),
 	fx.Provide(grpcsrv.New),
@@ -111,6 +115,8 @@ func setupLogger(c config.Config) *zap.Logger {
 		log, _ = zap.NewDevelopment()
 	case envProd:
 		log, _ = zap.NewProduction()
+	default:
+		log, _ = zap.NewDevelopment()
 	}
 
 	return log

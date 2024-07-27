@@ -15,13 +15,13 @@ import (
 
 type Opts struct {
 	fx.In
-	Auth   auth.Auth
+	Auth   auth.Service
 	Logger *zap.Logger
 }
 
 type Server struct {
 	v1.UnimplementedAuthServer
-	auth   auth.Auth
+	auth   auth.Service
 	logger *zap.Logger
 }
 

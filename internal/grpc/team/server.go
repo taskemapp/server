@@ -12,6 +12,8 @@ import (
 	v1 "taskem-server/tools/gen/grpc/v1"
 )
 
+const authMDKey = "authorization"
+
 type Opts struct {
 	fx.In
 	TeamRepo team.Repository

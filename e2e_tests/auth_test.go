@@ -1,4 +1,4 @@
-package test
+package e2e_tests
 
 import (
 	"context"
@@ -26,7 +26,7 @@ func TestSignUp(t *testing.T) {
 	conn, err := grpc.NewClient(fmt.Sprint("0.0.0.0:", 50051), opts...)
 	defer conn.Close()
 
-	require.Nil(t, err)
+	require.NoError(t, err)
 
 	client := v1.NewAuthClient(conn)
 
@@ -35,7 +35,7 @@ func TestSignUp(t *testing.T) {
 		Email:    testEmail,
 		Password: testPassword,
 	})
-	require.Nil(t, err)
+	require.NoError(t, err)
 }
 
 func TestLogin(t *testing.T) {
@@ -45,7 +45,7 @@ func TestLogin(t *testing.T) {
 	)
 	defer conn.Close()
 
-	require.Nil(t, err)
+	require.NoError(t, err)
 
 	client := v1.NewAuthClient(conn)
 
@@ -53,6 +53,6 @@ func TestLogin(t *testing.T) {
 		Email:    testEmail,
 		Password: testPassword,
 	})
-	require.Nil(t, err)
+	require.NoError(t, err)
 	t.Log(resp)
 }

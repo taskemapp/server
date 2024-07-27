@@ -1,3 +1,13 @@
+TEST_DIR := ./...
+COVERAGE_FILE := coverage.out
+COVERAGE_HTML := coverage.html
+
+test:
+	go test -v -coverprofile=$(COVERAGE_FILE) $(TEST_DIR)
+
+coverage: test
+	go tool cover -html=$(COVERAGE_FILE) -o $(COVERAGE_HTML)
+
 submodule:
 	@git submodule update --remote --recursive
 

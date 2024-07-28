@@ -23,3 +23,10 @@ func ToGetAllTeamsResponse(t *[]team.Team) *v1.GetAllTeamsResponse {
 		Teams: teams,
 	}
 }
+
+func ToCreateTeamResponse(t *team.Team) *v1.CreateTeamResponse {
+	return &v1.CreateTeamResponse{
+		TeamId:  t.ID.String(),
+		Message: "Successfully created a team",
+	}
+}

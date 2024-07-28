@@ -145,3 +145,32 @@ func TestToTeamResponse(t *testing.T) {
 		})
 	}
 }
+
+func TestToCreateTeamResponse(t *testing.T) {
+	tests := []struct {
+		name     string
+		input    *team.Team
+		expected *v1.CreateTeamResponse
+	}{
+		{
+			name: "Single team",
+			input: &team.Team{
+				ID:          uuid.MustParse("123e4567-e89b-12d3-a456-426614174000"),
+				Name:        "Team A",
+				Description: "Description A",
+				Creator:     uuid.MustParse("123e4567-e89b-12d3-a456-426614174001"),
+			},
+			expected: &v1.CreateTeamResponse{
+				TeamId:  "123e4567-e89b-12d3-a456-426614174000",
+				Message: "",
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := ToCreateTeamResponse(tt.input)
+			assert.Equal(t, tt.input.ID, result.TeamId)
+		})
+	}
+}

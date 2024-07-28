@@ -9,13 +9,15 @@ import (
 	"google.golang.org/grpc/status"
 )
 
+const authMDKey = "authorization"
+
 func ExtractTokenPayload(ctx context.Context, secret string) (jwt.MapClaims, error) {
 	md, ok := metadata.FromIncomingContext(ctx)
 	if !ok {
 		return nil, status.Errorf(codes.DataLoss, "Failed to get metadata")
 	}
 
-	tokens := md["authorization"]
+	tokens := md[authMDKey]
 	if len(tokens) == 0 {
 		return nil, status.Errorf(codes.Unauthenticated, "Authorization token not provided")
 	}

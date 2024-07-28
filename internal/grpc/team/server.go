@@ -3,7 +3,12 @@ package team
 import (
 	"context"
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgconn"
+	"github.com/pkg/errors"
 	"go.uber.org/fx"
+	"go.uber.org/zap"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/emptypb"
 	"taskem-server/internal/config"
 	"taskem-server/internal/grpc"
@@ -12,21 +17,29 @@ import (
 	v1 "taskem-server/tools/gen/grpc/v1"
 )
 
-const authMDKey = "authorization"
-
 type Opts struct {
 	fx.In
 	TeamRepo team.Repository
 	Config   config.Config
+	Logger   *zap.Logger
 }
 
-type Team struct {
+type Server struct {
 	v1.UnimplementedTeamServer
 	teamRepo team.Repository
 	config   config.Config
+	logger   *zap.Logger
 }
 
-func (t *Team) Get(ctx context.Context, request *v1.GetTeamRequest) (*v1.TeamResponse, error) {
+func New(opts Opts) *Server {
+	return &Server{
+		teamRepo: opts.TeamRepo,
+		config:   opts.Config,
+		logger:   opts.Logger,
+	}
+}
+
+func (t *Server) Get(ctx context.Context, request *v1.GetTeamRequest) (*v1.TeamResponse, error) {
 	payload, err := grpc.ExtractTokenPayload(ctx, t.config.TokenSecret)
 	if err != nil {
 		return nil, err
@@ -45,7 +58,7 @@ func (t *Team) Get(ctx context.Context, request *v1.GetTeamRequest) (*v1.TeamRes
 	return mapper.ToTeamResponse(fTeam), nil
 }
 
-func (t *Team) GetUserTeams(ctx context.Context, empty *emptypb.Empty) (*v1.GetAllTeamsResponse, error) {
+func (t *Server) GetUserTeams(ctx context.Context, empty *emptypb.Empty) (*v1.GetAllTeamsResponse, error) {
 	payload, err := grpc.ExtractTokenPayload(ctx, t.config.TokenSecret)
 	if err != nil {
 		return nil, err
@@ -69,32 +82,56 @@ func (t *Team) GetUserTeams(ctx context.Context, empty *emptypb.Empty) (*v1.GetA
 	return mapper.ToGetAllTeamsResponse(&res.Teams), nil
 }
 
-func (t *Team) GetAllCanJoin(ctx context.Context, empty *emptypb.Empty) (*v1.GetAllTeamsResponse, error) {
+func (t *Server) GetAllCanJoin(ctx context.Context, empty *emptypb.Empty) (*v1.GetAllTeamsResponse, error) {
 	//TODO implement me
 	panic("implement me")
 }
 
-func (t *Team) Create(ctx context.Context, request *v1.CreateTeamRequest) (*v1.CreateTeamResponse, error) {
+func (t *Server) Create(ctx context.Context, request *v1.CreateTeamRequest) (*v1.CreateTeamResponse, error) {
+	payload, err := grpc.ExtractTokenPayload(ctx, t.config.TokenSecret)
+	if err != nil {
+		return nil, err
+	}
+
+	var uid uuid.UUID
+	uid, err = uuid.Parse(payload["uid"].(string))
+	if err != nil {
+		return nil, err
+	}
+
+	c, err := t.teamRepo.Create(ctx, team.CreateOpts{
+		Creator:     uid,
+		Description: request.Description,
+		Name:        request.Name,
+	})
+	if err != nil {
+		t.logger.Sugar().Error(err)
+		switch {
+		case errors.As(err, pgconn.PgError{}):
+			return nil, status.Error(codes.Internal, "Internal server error")
+		}
+		return nil, status.Error(codes.Internal, "Internal server error")
+	}
+
+	return mapper.ToCreateTeamResponse(c), nil
+}
+
+func (t *Server) Join(ctx context.Context, request *v1.JoinTeamRequest) (*v1.JoinTeamResponse, error) {
 	//TODO implement me
 	panic("implement me")
 }
 
-func (t *Team) Join(ctx context.Context, request *v1.JoinTeamRequest) (*v1.JoinTeamResponse, error) {
+func (t *Server) GetRoles(ctx context.Context, request *v1.GetTeamRolesRequest) (*v1.GetTeamRolesResponse, error) {
 	//TODO implement me
 	panic("implement me")
 }
 
-func (t *Team) GetRoles(ctx context.Context, request *v1.GetTeamRolesRequest) (*v1.GetTeamRolesResponse, error) {
+func (t *Server) ChangeRole(ctx context.Context, role *v1.ChangeTeamRole) (*v1.Role, error) {
 	//TODO implement me
 	panic("implement me")
 }
 
-func (t *Team) ChangeRole(ctx context.Context, role *v1.ChangeTeamRole) (*v1.Role, error) {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (t *Team) Leave(ctx context.Context, request *v1.LeaveTeamRequest) (*v1.LeaveTeamResponse, error) {
+func (t *Server) Leave(ctx context.Context, request *v1.LeaveTeamRequest) (*v1.LeaveTeamResponse, error) {
 	//TODO implement me
 	panic("implement me")
 }

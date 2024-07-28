@@ -10,13 +10,15 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
-	authserver "taskem-server/internal/grpc/auth"
+	"taskem-server/internal/grpc/auth"
+	"taskem-server/internal/grpc/team"
 	v1 "taskem-server/tools/gen/grpc/v1"
 )
 
 type Opts struct {
 	fx.In
-	AuthServer *authserver.Server
+	AuthServer *auth.Server
+	TeamServer *team.Server
 	Log        *zap.Logger
 }
 
@@ -52,6 +54,7 @@ func New(opts Opts) App {
 	)
 
 	v1.RegisterAuthServer(srv, opts.AuthServer)
+	v1.RegisterTeamServer(srv, opts.TeamServer)
 
 	return App{Srv: srv}
 }

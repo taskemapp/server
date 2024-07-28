@@ -14,13 +14,11 @@ import (
 	"net"
 	"os"
 	"path/filepath"
+	"taskem-server/internal/app/auth"
 	grpcsrv "taskem-server/internal/app/grpc"
+	"taskem-server/internal/app/task"
+	"taskem-server/internal/app/team"
 	"taskem-server/internal/config"
-	authserver "taskem-server/internal/grpc/auth"
-	"taskem-server/internal/repositories/task"
-	"taskem-server/internal/repositories/team"
-	"taskem-server/internal/repositories/user"
-	authservice "taskem-server/internal/service/auth"
 )
 
 const (
@@ -33,16 +31,10 @@ var App = fx.Options(
 	fx.Provide(setupLogger),
 	fx.Provide(setupPgPool),
 
-	fx.Provide(
-		fx.Annotate(user.NewPgx, fx.As(new(user.Repository))),
-		fx.Annotate(task.NewPgx, fx.As(new(task.Repository))),
-		fx.Annotate(team.NewPgx, fx.As(new(team.Repository))),
-	),
+	auth.App,
+	team.App,
+	task.App,
 
-	fx.Provide(
-		fx.Annotate(authservice.New, fx.As(new(authservice.Service))),
-	),
-	fx.Provide(authserver.New),
 	fx.Provide(grpcsrv.New),
 
 	fx.Invoke(

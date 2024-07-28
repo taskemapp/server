@@ -98,7 +98,7 @@ func (p Pgx) Create(ctx context.Context, opts CreateOpts) (*Task, error) {
 		&task.Creator,
 		&task.CreatedAt,
 		&task.EditedAt,
-		&task.EndAt,
+		&task.EndedAt,
 	)
 	if err != nil {
 		return nil, err
@@ -130,7 +130,7 @@ func (p Pgx) FindByID(ctx context.Context, taskID uuid.UUID) (*Task, error) {
 		&task.Creator,
 		&task.CreatedAt,
 		&task.EditedAt,
-		&task.EndAt,
+		&task.EndedAt,
 	)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
@@ -179,7 +179,7 @@ func (p Pgx) FindByStatusAndUserID(ctx context.Context, userID uuid.UUID, status
 			&task.Creator,
 			&task.CreatedAt,
 			&task.EditedAt,
-			&task.EndAt,
+			&task.EndedAt,
 		)
 		if err != nil {
 			return nil, err
@@ -230,7 +230,7 @@ func (p Pgx) FindMany(ctx context.Context, opts FindManyOpts) (*FindManyResult, 
 			&task.Creator,
 			&task.CreatedAt,
 			&task.EditedAt,
-			&task.EndAt,
+			&task.EndedAt,
 		)
 		if err != nil {
 			return nil, err
@@ -300,7 +300,7 @@ func (p Pgx) FindManyBelongToTeam(ctx context.Context, teamID uuid.UUID, opts Fi
 			&task.Creator,
 			&task.CreatedAt,
 			&task.EditedAt,
-			&task.EndAt,
+			&task.EndedAt,
 		)
 		if err != nil {
 			return nil, err
@@ -370,7 +370,7 @@ func (p Pgx) FindManyBelongToUser(ctx context.Context, userID uuid.UUID, opts Fi
 			&task.Creator,
 			&task.CreatedAt,
 			&task.EditedAt,
-			&task.EndAt,
+			&task.EndedAt,
 		)
 		if err != nil {
 			return nil, err

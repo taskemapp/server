@@ -15,5 +15,5 @@ type Task struct {
 	Creator        uuid.UUID
 	CreatedAt      time.Time
 	EditedAt       *time.Time
-	EndAt          *time.Time
+	EndedAt        *time.Time
 }

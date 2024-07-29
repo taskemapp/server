@@ -2,6 +2,7 @@ package e2e_tests
 
 //
 //func TestGet(t *testing.T) {
+//	SkipCI(t)
 //	conn, err := grpc.NewClient(
 //		fmt.Sprintf("0.0.0.0:%d", cfg.GrpcPort),
 //		grpc.WithTransportCredentials(insecure.NewCredentials()),
@@ -23,6 +24,7 @@ package e2e_tests
 //}
 //
 //func TestGetUserTeams(t *testing.T) {
+//	SkipCI(t)
 //	conn, err := grpc.NewClient(
 //		fmt.Sprintf("0.0.0.0:%d", cfg.GrpcPort),
 //		grpc.WithTransportCredentials(insecure.NewCredentials()),
@@ -40,6 +42,7 @@ package e2e_tests
 //}
 //
 //func TestGetAllCanJoin(t *testing.T) {
+//	SkipCI(t)
 //	conn, err := grpc.NewClient(
 //		fmt.Sprintf("0.0.0.0:%d", cfg.GrpcPort),
 //		grpc.WithTransportCredentials(insecure.NewCredentials()),
@@ -57,6 +60,7 @@ package e2e_tests
 //}
 //
 //func TestCreate(t *testing.T) {
+//	SkipCI(t)
 //	conn, err := grpc.NewClient(
 //		fmt.Sprintf("0.0.0.0:%d", cfg.GrpcPort),
 //		grpc.WithTransportCredentials(insecure.NewCredentials()),
@@ -77,6 +81,7 @@ package e2e_tests
 //}
 //
 //func TestJoin(t *testing.T) {
+//	SkipCI(t)
 //	conn, err := grpc.NewClient(
 //		fmt.Sprintf("0.0.0.0:%d", cfg.GrpcPort),
 //		grpc.WithTransportCredentials(insecure.NewCredentials()),
@@ -96,6 +101,7 @@ package e2e_tests
 //}
 //
 //func TestGetRoles(t *testing.T) {
+//	SkipCI(t)
 //	conn, err := grpc.NewClient(
 //		fmt.Sprintf("0.0.0.0:%d", cfg.GrpcPort),
 //		grpc.WithTransportCredentials(insecure.NewCredentials()),
@@ -115,6 +121,7 @@ package e2e_tests
 //}
 //
 //func TestChangeRole(t *testing.T) {
+//	SkipCI(t)
 //	conn, err := grpc.NewClient(
 //		fmt.Sprintf("0.0.0.0:%d", cfg.GrpcPort),
 //		grpc.WithTransportCredentials(insecure.NewCredentials()),
@@ -135,6 +142,7 @@ package e2e_tests
 //}
 //
 //func TestLeave(t *testing.T) {
+//	SkipCI(t)
 //	conn, err := grpc.NewClient(
 //		fmt.Sprintf("0.0.0.0:%d", cfg.GrpcPort),
 //		grpc.WithTransportCredentials(insecure.NewCredentials()),

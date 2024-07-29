@@ -19,6 +19,7 @@ var (
 )
 
 func TestSignUp(t *testing.T) {
+	SkipCI(t)
 	opts := []grpc.DialOption{
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 	}
@@ -39,6 +40,7 @@ func TestSignUp(t *testing.T) {
 }
 
 func TestLogin(t *testing.T) {
+	SkipCI(t)
 	conn, err := grpc.NewClient(
 		fmt.Sprintf("0.0.0.0:%d", cfg.GrpcPort),
 		grpc.WithTransportCredentials(insecure.NewCredentials()),

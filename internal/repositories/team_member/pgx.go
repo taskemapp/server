@@ -63,6 +63,7 @@ func (p *Pgx) FindByID(ctx context.Context, tmID uuid.UUID) (*TeamMember, error)
 		&tm.IsLeaved,
 	)
 	if err != nil {
+		p.logger.Sugar().Error(err)
 		if errors.Is(err, pgx.ErrNoRows) {
 			return nil, ErrNotFound
 		}
@@ -98,6 +99,7 @@ func (p *Pgx) Create(ctx context.Context, opts CreateOpts) (*TeamMember, error) 
 
 	defer func() {
 		if err != nil {
+			p.logger.Sugar().Error(err)
 			_ = tx.Rollback(ctx)
 		} else {
 			_ = tx.Commit(ctx)
@@ -114,6 +116,7 @@ func (p *Pgx) Create(ctx context.Context, opts CreateOpts) (*TeamMember, error) 
 		&tm.IsLeaved,
 	)
 	if err != nil {
+		p.logger.Sugar().Error(err)
 		return nil, err
 	}
 
@@ -140,6 +143,7 @@ func (p *Pgx) Update(ctx context.Context, tmID uuid.UUID, opts UpdateOpts) (*Tea
 
 	_, err = p.pgx.Exec(ctx, query, args...)
 	if err != nil {
+		p.logger.Sugar().Error(err)
 		return nil, err
 	}
 

@@ -3,10 +3,13 @@ package team_member
 import (
 	"context"
 	"github.com/Masterminds/squirrel"
+	"github.com/go-faster/errors"
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"go.uber.org/fx"
 	"go.uber.org/zap"
+	"time"
 )
 
 const tableName = "team_members"
@@ -27,6 +30,46 @@ func NewPgx(opts Opts) (*Pgx, error) {
 		pgx:    opts.Pgx,
 		logger: opts.Logger,
 	}, nil
+}
+
+var selectTeamFields = []string{
+	"id",
+	"user_id",
+	"team_id",
+	"joined_at",
+	"leaved_at",
+	"is_leaved",
+}
+
+func (p *Pgx) FindByID(ctx context.Context, tmID uuid.UUID) (*TeamMember, error) {
+	query, args, err := squirrel.StatementBuilder.PlaceholderFormat(squirrel.Dollar).
+		Select(selectTeamFields...).
+		From(tableName).
+		Where(squirrel.Eq{"id": tmID}).
+		Limit(1).
+		ToSql()
+
+	if err != nil {
+		return nil, err
+	}
+
+	var tm TeamMember
+	err = p.pgx.QueryRow(ctx, query, args...).Scan(
+		&tm.ID,
+		&tm.UserID,
+		&tm.TeamID,
+		&tm.JoinedAt,
+		&tm.LeavedAt,
+		&tm.IsLeaved,
+	)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, ErrNotFound
+		}
+		return nil, err
+	}
+
+	return &tm, nil
 }
 
 func (p *Pgx) Create(ctx context.Context, opts CreateOpts) (*TeamMember, error) {
@@ -82,6 +125,27 @@ func (p *Pgx) Create(ctx context.Context, opts CreateOpts) (*TeamMember, error) 
 }
 
 func (p *Pgx) Update(ctx context.Context, tmID uuid.UUID, opts UpdateOpts) (*TeamMember, error) {
-	//TODO implement me
-	panic("implement me")
+	var updateMap = map[string]interface{}{}
+
+	if opts.IsLeaved != nil {
+		updateMap["is_leaved"] = *opts.IsLeaved
+	}
+
+	updateMap["leaved_at"] = time.Now()
+
+	query, args, err := squirrel.StatementBuilder.PlaceholderFormat(squirrel.Dollar).
+		Update(tableName).
+		SetMap(updateMap).
+		Where(squirrel.Eq{"id": tmID}).
+		ToSql()
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = p.pgx.Exec(ctx, query, args...)
+	if err != nil {
+		return nil, err
+	}
+
+	return p.FindByID(ctx, tmID)
 }

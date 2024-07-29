@@ -74,12 +74,8 @@ func (p *Pgx) FindByID(ctx context.Context, tmID uuid.UUID) (*TeamMember, error)
 
 func (p *Pgx) Create(ctx context.Context, opts CreateOpts) (*TeamMember, error) {
 	fields := []string{
-		"id",
 		"user_id",
 		"team_id",
-		"joined_at",
-		"leaved_at",
-		"is_leaved",
 	}
 
 	query, args, err := squirrel.StatementBuilder.PlaceholderFormat(squirrel.Dollar).

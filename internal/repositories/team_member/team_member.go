@@ -7,6 +7,7 @@ import (
 
 type Repository interface {
 	FindByID(ctx context.Context, tmID uuid.UUID) (*TeamMember, error)
+	FindByUserAndTeam(ctx context.Context, userID uuid.UUID, teamID uuid.UUID) (*TeamMember, error)
 	Create(ctx context.Context, opts CreateOpts) (*TeamMember, error)
 	// Update row by team member pk id
 	Update(ctx context.Context, tmID uuid.UUID, opts UpdateOpts) (*TeamMember, error)

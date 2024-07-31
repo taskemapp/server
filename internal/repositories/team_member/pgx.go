@@ -73,6 +73,41 @@ func (p *Pgx) FindByID(ctx context.Context, tmID uuid.UUID) (*TeamMember, error)
 	return &tm, nil
 }
 
+func (p *Pgx) FindByUserAndTeam(ctx context.Context, userID uuid.UUID, teamID uuid.UUID) (*TeamMember, error) {
+	query, args, err := squirrel.StatementBuilder.PlaceholderFormat(squirrel.Dollar).
+		Select(selectTeamFields...).
+		From(tableName).
+		Where(squirrel.Eq{
+			"user_id": userID,
+			"team_id": teamID,
+		}).
+		Limit(1).
+		ToSql()
+
+	if err != nil {
+		return nil, err
+	}
+
+	var tm TeamMember
+	err = p.pgx.QueryRow(ctx, query, args...).Scan(
+		&tm.ID,
+		&tm.UserID,
+		&tm.TeamID,
+		&tm.JoinedAt,
+		&tm.LeavedAt,
+		&tm.IsLeaved,
+	)
+	if err != nil {
+		p.logger.Sugar().Error(err)
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, ErrNotFound
+		}
+		return nil, err
+	}
+
+	return &tm, nil
+}
+
 func (p *Pgx) Create(ctx context.Context, opts CreateOpts) (*TeamMember, error) {
 	fields := []string{
 		"user_id",

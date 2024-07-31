@@ -43,7 +43,7 @@ func (a *Auth) Login(ctx context.Context, opts LoginOpts) (resp *LoginResponse, 
 	}
 
 	token, err := jwt.NewToken(jwt.Opts{
-		Id:       u.ID,
+		ID:       u.ID,
 		Duration: a.config.TokenTtl,
 		Email:    u.Email,
 		Secret:   a.config.TokenSecret,
@@ -53,7 +53,7 @@ func (a *Auth) Login(ctx context.Context, opts LoginOpts) (resp *LoginResponse, 
 	}
 
 	refresh, err := jwt.NewToken(jwt.Opts{
-		Id:       u.ID,
+		ID:       u.ID,
 		Duration: a.config.RefreshTokenTtl,
 		Secret:   a.config.TokenSecret,
 	})

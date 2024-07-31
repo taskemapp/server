@@ -13,29 +13,30 @@ import (
 	"taskem-server/internal/config"
 	"taskem-server/internal/grpc"
 	"taskem-server/internal/mapper"
-	"taskem-server/internal/repositories/team"
+	"taskem-server/internal/service"
+	"taskem-server/internal/service/team"
 	v1 "taskem-server/tools/gen/grpc/v1"
 )
 
 type Opts struct {
 	fx.In
-	TeamRepo team.Repository
-	Config   config.Config
-	Logger   *zap.Logger
+	Team   team.Service
+	Config config.Config
+	Logger *zap.Logger
 }
 
 type Server struct {
 	v1.UnimplementedTeamServer
-	teamRepo team.Repository
-	config   config.Config
-	logger   *zap.Logger
+	team   team.Service
+	config config.Config
+	logger *zap.Logger
 }
 
 func New(opts Opts) *Server {
 	return &Server{
-		teamRepo: opts.TeamRepo,
-		config:   opts.Config,
-		logger:   opts.Logger,
+		team:   opts.Team,
+		config: opts.Config,
+		logger: opts.Logger,
 	}
 }
 
@@ -51,7 +52,7 @@ func (t *Server) Get(ctx context.Context, request *v1.GetTeamRequest) (*v1.TeamR
 		return nil, err
 	}
 
-	fTeam, err := t.teamRepo.FindByID(ctx, uid)
+	fTeam, err := t.team.Get(ctx, uid)
 	if err != nil {
 		return nil, err
 	}
@@ -72,7 +73,7 @@ func (t *Server) GetUserTeams(ctx context.Context, empty *emptypb.Empty) (*v1.Ge
 
 	page := payload["page"].(int)
 
-	res, err := t.teamRepo.FindManyBelongToUser(ctx, uid, team.FindManyOpts{
+	res, err := t.team.GetUserTeams(ctx, uid, service.PaginationOpts{
 		Page:    page,
 		PerPage: 30,
 	})
@@ -99,10 +100,10 @@ func (t *Server) Create(ctx context.Context, request *v1.CreateTeamRequest) (*v1
 		return nil, err
 	}
 
-	c, err := t.teamRepo.Create(ctx, team.CreateOpts{
-		Creator:     uid,
-		Description: request.Description,
-		Name:        request.Name,
+	c, err := t.team.Create(ctx, team.CreateOpts{
+		CreatorID:   uid,
+		Name:        "",
+		Description: "",
 	})
 	if err != nil {
 		t.logger.Sugar().Error(err)
@@ -117,8 +118,29 @@ func (t *Server) Create(ctx context.Context, request *v1.CreateTeamRequest) (*v1
 }
 
 func (t *Server) Join(ctx context.Context, request *v1.JoinTeamRequest) (*v1.JoinTeamResponse, error) {
-	//TODO implement me
-	panic("implement me")
+	panic("")
+	//payload, err := grpc.ExtractTokenPayload(ctx, t.config.TokenSecret)
+	//if err != nil {
+	//	return nil, err
+	//}
+	//
+	//var uid uuid.UUID
+	//uid, err = uuid.Parse(payload["uid"].(string))
+	//if err != nil {
+	//	return nil, err
+	//}
+	//
+	//teamID, err := uuid.Parse(request.TeamId)
+	//
+	//err = t.team.Join(ctx, team.JoinOpts{
+	//	UserID: uid,
+	//	TeamID: teamID,
+	//})
+	//if err != nil {
+	//	return nil,
+	//}
+	//
+	//return
 }
 
 func (t *Server) GetRoles(ctx context.Context, request *v1.GetTeamRolesRequest) (*v1.GetTeamRolesResponse, error) {

@@ -17,5 +17,6 @@ gen:
 gen-win:
 	@powershell -ExecutionPolicy Bypass -File ./scripts/gen_proto.ps1
 
+# make create-migration name="name"
 create-migration:
-	@go run github.com/pressly/goose/v3/cmd/goose postgres "user=stream password=stream dbname=stream sslmode=disable" create $(name) sql
+	@go run github.com/pressly/goose/v3/cmd/goose postgres "user=taskem password=taskem dbname=taskem sslmode=disable" create $(name) sql

@@ -2,16 +2,20 @@ package grpc
 
 import (
 	"context"
-	"fmt"
-	"github.com/golang-jwt/jwt/v5"
+	"errors"
+	jwt2 "github.com/golang-jwt/jwt/v5"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
+	"taskem-server/internal/pkg/jwt"
 )
 
 const authMDKey = "authorization"
 
-func ExtractTokenPayload(ctx context.Context, secret string) (jwt.MapClaims, error) {
+// ExtractTokenPayload get token from grpc request metadata
+//
+// Already throws formated grpc with status.Errorf
+func ExtractTokenPayload(ctx context.Context, secret string) (jwt2.MapClaims, error) {
 	md, ok := metadata.FromIncomingContext(ctx)
 	if !ok {
 		return nil, status.Errorf(codes.DataLoss, "Failed to get metadata")
@@ -23,20 +27,19 @@ func ExtractTokenPayload(ctx context.Context, secret string) (jwt.MapClaims, err
 	}
 	tokenStr := tokens[0]
 
-	token, err := jwt.Parse(tokenStr, func(token *jwt.Token) (interface{}, error) {
-		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
-		}
-		return []byte(secret), nil
-	})
+	payload, err := jwt.GetPayload(tokenStr, secret)
 
 	if err != nil {
-		return nil, status.Errorf(codes.Internal, "Failed to parse token: %v", err)
+		switch {
+		case errors.Is(err, jwt.ErrTokenExpired):
+			return nil, status.Errorf(codes.Unauthenticated, "Token expired")
+		case errors.Is(err, jwt.ErrTokenParse):
+			return nil, status.Errorf(codes.InvalidArgument, "Token parse error")
+		case errors.Is(err, jwt.ErrTokenValidation):
+			return nil, status.Errorf(codes.Unauthenticated, "Token validation error")
+		default:
+			return nil, status.Errorf(codes.Internal, "Internal error")
+		}
 	}
-
-	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
-		return claims, nil
-	} else {
-		return nil, status.Errorf(codes.Unauthenticated, "Invalid token claims")
-	}
+	return *payload, nil
 }

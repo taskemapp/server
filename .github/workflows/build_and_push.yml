@@ -1,9 +1,10 @@
 name: Build and push apps
 
 on:
-  push:
-#    branches: [ "main", "ci/docker-build-push" ]
-#  workflow_dispatch:
+  workflow_run:
+    workflows: ["Test and coverage"]
+    types: [requested]
+    branches: [ "dev", "master", "releases/**" ]
 
 env:
   DOCKER_REGISTRY: ghcr.io

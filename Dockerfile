@@ -6,6 +6,7 @@
 
 # Want to help us make this template better? Share your feedback here: https://forms.gle/ybq9Krt8jtBL3iCk7
 
+LABEL org.opencontainers.image.source="https://github.com/taskemapp/taskem-server"
 ################################################################################
 # Create a stage for building the application.
 ARG GO_VERSION=1.22.0

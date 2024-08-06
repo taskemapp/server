@@ -38,5 +38,5 @@ jobs:
           context: .
           push: true
           tags: |
-            ${{ env.DOCKER_IMAGE }}:${{ matrix.app }}-latest
-            ${{ env.DOCKER_IMAGE }}:${{ matrix.app }}-${{ github.sha }}
+            ${{ env.DOCKER_IMAGE }}:latest
+            ${{ env.DOCKER_IMAGE }}:${{ github.sha }}

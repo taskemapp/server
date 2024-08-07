@@ -6,12 +6,13 @@
 
 # Want to help us make this template better? Share your feedback here: https://forms.gle/ybq9Krt8jtBL3iCk7
 
-LABEL org.opencontainers.image.source="https://github.com/taskemapp/taskem-server"
 ################################################################################
 # Create a stage for building the application.
 ARG GO_VERSION=1.22.0
 FROM --platform=$BUILDPLATFORM golang:${GO_VERSION} AS build
 WORKDIR /src
+
+LABEL org.opencontainers.image.source="https://github.com/taskemapp/taskem-server"
 
 # Download dependencies as a separate step to take advantage of Docker's caching.
 # Leverage a cache mount to /go/pkg/mod/ to speed up subsequent builds.

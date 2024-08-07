@@ -1,4 +1,4 @@
-name: Build and push apps
+name: Build and push app to registry
 
 on:
   workflow_run:

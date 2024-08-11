@@ -7,6 +7,7 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
+	"strings"
 	"taskem-server/internal/pkg/jwt"
 )
 
@@ -26,6 +27,9 @@ func ExtractTokenPayload(ctx context.Context, secret string) (jwt2.MapClaims, er
 		return nil, status.Errorf(codes.Unauthenticated, "Authorization token not provided")
 	}
 	tokenStr := tokens[0]
+
+	// Delete "Bearer" from token
+	tokenStr = strings.Split(tokenStr, " ")[1]
 
 	payload, err := jwt.GetPayload(tokenStr, secret)
 

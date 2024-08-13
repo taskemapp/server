@@ -26,20 +26,35 @@ func IsPwdComplex(password string) bool {
 		}
 	}
 
-	var symbolPool int
-	if isLower && isUpper && isDigit && isSpecial {
-		symbolPool = 95 // contains (a-z, A-Z, ASCII, space)
-	} else if isLower && isUpper && isDigit {
-		symbolPool = 62 // contains (a-z, A-Z, 0-9)
-	} else if isLower && isDigit {
-		symbolPool = 36 // contains (a-z, 0-9)
-	} else {
-		symbolPool = 26 // contains (a-z)
-	}
+	symbolPool := calcSymbolPool(isDigit, isUpper, isLower, isSpecial)
 
 	pwdComplexity := math.Log2(float64(symbolPool)) * float64(len(password))
 
 	const minComplexity = 40.0
 
 	return pwdComplexity > minComplexity
+}
+
+func calcSymbolPool(
+	isDigit,
+	isUpper,
+	isLower,
+	isSpecial bool,
+) int {
+	switch {
+	case isLower && isUpper && isDigit && isSpecial:
+		return 95 // contains (a-z, A-Z, ASCII, space)
+	case isLower && isUpper && isDigit:
+		return 62 // contains (a-z, A-Z, 0-9)
+	case (isLower || isUpper) && isDigit:
+		return 36 // contains (a-z or A-Z, 0-9)
+	case isSpecial:
+		return 32
+	case isLower || isUpper:
+		return 26 // contains (a-z or A-Z)
+	case isDigit:
+		return 10 // contains (0-9)
+	}
+
+	return 0
 }

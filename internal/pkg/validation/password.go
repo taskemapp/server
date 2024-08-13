@@ -40,9 +40,6 @@ func IsPwdComplex(password string) bool {
 	pwdComplexity := math.Log2(float64(symbolPool)) * float64(len(password))
 
 	const minComplexity = 40.0
-	if pwdComplexity < minComplexity {
-		return false
-	}
 
-	return true
+	return pwdComplexity > minComplexity
 }

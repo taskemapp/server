@@ -43,13 +43,13 @@ func calcSymbolPool(
 ) int {
 	switch {
 	case isLower && isUpper && isDigit && isSpecial:
-		return 95 // contains (a-z, A-Z, ASCII, space)
+		return 95 // contains (a-z, A-Z, 0-9, special)
 	case isLower && isUpper && isDigit:
 		return 62 // contains (a-z, A-Z, 0-9)
 	case (isLower || isUpper) && isDigit:
 		return 36 // contains (a-z or A-Z, 0-9)
 	case isSpecial:
-		return 32
+		return 32 // contains (special)
 	case isLower || isUpper:
 		return 26 // contains (a-z or A-Z)
 	case isDigit:

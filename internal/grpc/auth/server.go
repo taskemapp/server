@@ -8,6 +8,8 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/emptypb"
+	"regexp"
+	"taskem-server/internal/pkg/validation"
 	"taskem-server/internal/repositories/user"
 	"taskem-server/internal/service/auth"
 	"taskem-server/tools/gen/grpc/v1"
@@ -87,7 +89,16 @@ func (s *Server) SignUp(
 		return nil, status.Error(codes.InvalidArgument, "Missing argument: password")
 	}
 
-	err := s.auth.Registration(
+	isValidMail, err := regexp.MatchString(validation.EmailRegex, req.Email)
+	if !isValidMail || err != nil {
+		return nil, status.Error(codes.InvalidArgument, "Invalid email: use format example@example.com")
+	}
+
+	if !validation.IsPwdComplex(req.Password) {
+		return nil, status.Error(codes.InvalidArgument, "Password is too weak")
+	}
+
+	err = s.auth.Registration(
 		ctx,
 		auth.RegistrationOpts{
 			Email:    req.Email,

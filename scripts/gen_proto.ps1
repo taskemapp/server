@@ -1,5 +1,5 @@
 $protoBaseDir = "protos"
-$outBaseDir = "tools/gen/grpc"
+$outBaseDir = "./apps/server/tools/gen/grpc"
 
 if (-not (Test-Path -Path $outBaseDir)) {
     New-Item -ItemType Directory -Path $outBaseDir

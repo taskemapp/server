@@ -3,7 +3,7 @@ services:
     image: postgres:16
     restart: always
     ports:
-      - 54321:5432
+      - "54321:5432"
     environment:
       POSTGRES_USER: taskem
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
@@ -44,15 +44,34 @@ services:
   #          - users.minio
   #          - teams.minio
 
+  rabbitmq:
+    image: rabbitmq:3.13.6-management
+    environment:
+      RABBITMQ_DEFAULT_USER: taskem
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD}
+    ports:
+      - "56721:5672"
+      - "8080:15672"
+
   server:
-    env_file: ".env"
+    env_file: ".env.dev"
     build:
-      context: .
+      context: ./apps/server/
       target: final
     depends_on:
       - db
     ports:
-      - 50051:50051
+      - "50051:50051"
+
+#  notification:
+#    env_file: ".env"
+#    build:
+#      context: ./apps/server/
+#      target: final
+#    depends_on:
+#      - db
+#    ports:
+#      - 50051:50051
 
 volumes:
   db-data:

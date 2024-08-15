@@ -3,10 +3,10 @@ package auth
 import (
 	"context"
 	"github.com/alexedwards/argon2id"
+	"github.com/taskemapp/server/apps/server/internal/config"
+	"github.com/taskemapp/server/apps/server/internal/pkg/jwt"
+	"github.com/taskemapp/server/apps/server/internal/repositories/user"
 	"go.uber.org/fx"
-	"server/internal/config"
-	"server/internal/pkg/jwt"
-	"server/internal/repositories/user"
 )
 
 type Opts struct {

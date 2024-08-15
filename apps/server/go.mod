@@ -1,4 +1,4 @@
-module server
+module github.com/taskemapp/server/apps/server
 
 go 1.23.0
 

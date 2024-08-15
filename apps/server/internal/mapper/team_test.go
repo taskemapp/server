@@ -3,9 +3,9 @@ package mapper
 import (
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
+	"github.com/taskemapp/server/apps/server/internal/repositories/team"
+	v1 "github.com/taskemapp/server/apps/server/tools/gen/grpc/v1"
 	"reflect"
-	"server/internal/repositories/team"
-	v1 "server/tools/gen/grpc/v1"
 	"testing"
 )
 

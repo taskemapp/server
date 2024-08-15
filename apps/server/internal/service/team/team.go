@@ -3,8 +3,8 @@ package team
 import (
 	"context"
 	"github.com/google/uuid"
-	"server/internal/repositories/team"
-	"server/internal/service"
+	"github.com/taskemapp/server/apps/server/internal/repositories/team"
+	"github.com/taskemapp/server/apps/server/internal/service"
 )
 
 type Service interface {

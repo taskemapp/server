@@ -2,8 +2,8 @@ package mapper
 
 import (
 	"github.com/samber/lo"
-	"server/internal/repositories/team"
-	v1 "server/tools/gen/grpc/v1"
+	"github.com/taskemapp/server/apps/server/internal/repositories/team"
+	v1 "github.com/taskemapp/server/apps/server/tools/gen/grpc/v1"
 )
 
 func ToTeamResponse(t *team.Team) *v1.TeamResponse {

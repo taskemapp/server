@@ -5,14 +5,14 @@ import (
 	"fmt"
 	"github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/logging"
 	"github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/recovery"
+	"github.com/taskemapp/server/apps/server/internal/grpc/auth"
+	"github.com/taskemapp/server/apps/server/internal/grpc/team"
+	v1 "github.com/taskemapp/server/apps/server/tools/gen/grpc/v1"
 	"go.uber.org/fx"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
-	"server/internal/grpc/auth"
-	"server/internal/grpc/team"
-	v1 "server/tools/gen/grpc/v1"
 )
 
 type Opts struct {

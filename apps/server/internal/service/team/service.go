@@ -3,11 +3,11 @@ package team
 import (
 	"context"
 	"github.com/google/uuid"
+	"github.com/taskemapp/server/apps/server/internal/repositories/team"
+	"github.com/taskemapp/server/apps/server/internal/repositories/team_member"
+	"github.com/taskemapp/server/apps/server/internal/service"
 	"go.uber.org/fx"
 	"go.uber.org/zap"
-	"server/internal/repositories/team"
-	"server/internal/repositories/team_member"
-	"server/internal/service"
 )
 
 type Opts struct {

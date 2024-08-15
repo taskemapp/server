@@ -1,8 +1,8 @@
 package task
 
 import (
+	"github.com/taskemapp/server/apps/server/internal/repositories/task"
 	"go.uber.org/fx"
-	"server/internal/repositories/task"
 )
 
 var App = fx.Options(

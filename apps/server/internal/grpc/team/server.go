@@ -5,17 +5,17 @@ import (
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/pkg/errors"
+	"github.com/taskemapp/server/apps/server/internal/config"
+	"github.com/taskemapp/server/apps/server/internal/grpc"
+	"github.com/taskemapp/server/apps/server/internal/mapper"
+	"github.com/taskemapp/server/apps/server/internal/service"
+	"github.com/taskemapp/server/apps/server/internal/service/team"
+	v1 "github.com/taskemapp/server/apps/server/tools/gen/grpc/v1"
 	"go.uber.org/fx"
 	"go.uber.org/zap"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/emptypb"
-	"server/internal/config"
-	"server/internal/grpc"
-	"server/internal/mapper"
-	"server/internal/service"
-	"server/internal/service/team"
-	v1 "server/tools/gen/grpc/v1"
 )
 
 type Opts struct {

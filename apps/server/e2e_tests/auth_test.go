@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"github.com/brianvoe/gofakeit/v7"
 	"github.com/stretchr/testify/require"
+	"github.com/taskemapp/server/apps/server/internal/config"
+	v1 "github.com/taskemapp/server/apps/server/tools/gen/grpc/v1"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
-	"server/internal/config"
-	v1 "server/tools/gen/grpc/v1"
 	"testing"
 )
 

@@ -1,11 +1,11 @@
 package team
 
 import (
+	teamserver "github.com/taskemapp/server/apps/server/internal/grpc/team"
+	"github.com/taskemapp/server/apps/server/internal/repositories/team"
+	"github.com/taskemapp/server/apps/server/internal/repositories/team_member"
+	teamservice "github.com/taskemapp/server/apps/server/internal/service/team"
 	"go.uber.org/fx"
-	teamserver "server/internal/grpc/team"
-	"server/internal/repositories/team"
-	"server/internal/repositories/team_member"
-	teamservice "server/internal/service/team"
 )
 
 var App = fx.Options(

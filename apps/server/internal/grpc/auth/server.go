@@ -3,16 +3,16 @@ package auth
 import (
 	"context"
 	"errors"
+	"github.com/taskemapp/server/apps/server/internal/pkg/validation"
+	"github.com/taskemapp/server/apps/server/internal/repositories/user"
+	"github.com/taskemapp/server/apps/server/internal/service/auth"
+	"github.com/taskemapp/server/apps/server/tools/gen/grpc/v1"
 	"go.uber.org/fx"
 	"go.uber.org/zap"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/emptypb"
 	"regexp"
-	"server/internal/pkg/validation"
-	"server/internal/repositories/user"
-	"server/internal/service/auth"
-	"server/tools/gen/grpc/v1"
 )
 
 type Opts struct {

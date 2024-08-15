@@ -1,10 +1,10 @@
 package auth
 
 import (
+	authserver "github.com/taskemapp/server/apps/server/internal/grpc/auth"
+	"github.com/taskemapp/server/apps/server/internal/repositories/user"
+	authservice "github.com/taskemapp/server/apps/server/internal/service/auth"
 	"go.uber.org/fx"
-	authserver "server/internal/grpc/auth"
-	"server/internal/repositories/user"
-	authservice "server/internal/service/auth"
 )
 
 var App = fx.Options(

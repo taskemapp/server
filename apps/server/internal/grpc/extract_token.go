@@ -4,10 +4,10 @@ import (
 	"context"
 	"errors"
 	jwt2 "github.com/golang-jwt/jwt/v5"
+	"github.com/taskemapp/server/apps/server/internal/pkg/jwt"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
-	"server/internal/pkg/jwt"
 )
 
 const authMDKey = "authorization"

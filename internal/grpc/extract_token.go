@@ -13,10 +13,7 @@ import (
 
 const authMDKey = "authorization"
 
-// ExtractTokenPayload get token from grpc request metadata
-//
-// Already throws formated grpc with status.Errorf
-func ExtractTokenPayload(ctx context.Context, secret string) (jwt2.MapClaims, error) {
+func ExtractToken(ctx context.Context) (*string, error) {
 	md, ok := metadata.FromIncomingContext(ctx)
 	if !ok {
 		return nil, status.Errorf(codes.DataLoss, "Failed to get metadata")
@@ -30,6 +27,20 @@ func ExtractTokenPayload(ctx context.Context, secret string) (jwt2.MapClaims, er
 
 	// Delete "Bearer" from token
 	tokenStr = strings.Split(tokenStr, " ")[1]
+
+	return &tokenStr, nil
+}
+
+// ExtractTokenPayload get token from grpc request metadata
+//
+// Already throws formated grpc with status.Errorf
+func ExtractTokenPayload(ctx context.Context, secret string) (jwt2.MapClaims, error) {
+	token, err := ExtractToken(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	var tokenStr = *token
 
 	payload, err := jwt.GetPayload(tokenStr, secret)
 

@@ -7,7 +7,6 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
-	"strings"
 	"taskem-server/internal/pkg/jwt"
 )
 
@@ -26,7 +25,7 @@ func ExtractToken(ctx context.Context) (*string, error) {
 	tokenStr := tokens[0]
 
 	// Delete "Bearer" from token
-	tokenStr = strings.Split(tokenStr, " ")[1]
+	tokenStr = tokenStr[7:]
 
 	return &tokenStr, nil
 }

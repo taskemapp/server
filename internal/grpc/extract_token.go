@@ -33,13 +33,21 @@ func ExtractToken(ctx context.Context) (*string, error) {
 // ExtractTokenPayload get token from grpc request metadata
 //
 // Already throws formated grpc with status.Errorf
-func ExtractTokenPayload(ctx context.Context, secret string) (jwt2.MapClaims, error) {
-	token, err := ExtractToken(ctx)
-	if err != nil {
-		return nil, err
+func ExtractTokenPayload(
+	ctx context.Context,
+	secret string,
+	tokenOpt ...*string,
+) (jwt2.MapClaims, error) {
+	var tokenStr string
+	if len(tokenOpt) > 0 && tokenOpt[0] != nil {
+		tokenStr = *tokenOpt[0]
+	} else {
+		token, err := ExtractToken(ctx)
+		if err != nil {
+			return nil, err
+		}
+		tokenStr = *token
 	}
-
-	var tokenStr = *token
 
 	payload, err := jwt.GetPayload(tokenStr, secret)
 

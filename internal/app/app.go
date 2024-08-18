@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"github.com/go-redis/redis/v8"
 	"github.com/jackc/pgx/v5/pgxpool"
 	_ "github.com/jackc/pgx/v5/stdlib"
 	"github.com/pressly/goose/v3"
@@ -12,6 +13,7 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 	"net"
+	"net/url"
 	"os"
 	"path/filepath"
 	"taskem-server/internal/app/auth"
@@ -30,6 +32,7 @@ var App = fx.Options(
 	fx.Provide(setupConfig),
 	fx.Provide(setupLogger),
 	fx.Provide(setupPgPool),
+	fx.Provide(setupRedisClient),
 
 	auth.App,
 	team.App,
@@ -116,4 +119,38 @@ func setupLogger(c config.Config) *zap.Logger {
 
 func setupPgPool(c config.Config) (*pgxpool.Pool, error) {
 	return pgxpool.New(context.Background(), c.PostgresUrl)
+}
+
+func setupRedisClient(c config.Config) (*redis.Client, error) {
+	// Разбор URL
+	redisURL, err := url.Parse(c.RedisURL)
+	if err != nil {
+		return nil, err
+	}
+
+	// Извлечение хоста и порта
+	addr := redisURL.Host
+
+	// Извлечение пароля
+	password, _ := redisURL.User.Password()
+
+	// Извлечение базы данных (если есть)
+	var db int
+	if redisURL.Path != "" {
+		fmt.Sscanf(redisURL.Path, "/%d", &db)
+	}
+
+	rdb := redis.NewClient(&redis.Options{
+		Addr:     addr,
+		Password: password, // Если пароля нет, оставьте пустым
+		DB:       db,       // Если базы данных нет, оставьте 0
+	})
+
+	// Проверяем подключение
+	_, err = rdb.Ping(context.Background()).Result()
+	if err != nil {
+		return nil, err
+	}
+
+	return rdb, nil
 }

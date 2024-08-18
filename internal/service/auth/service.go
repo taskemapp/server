@@ -6,24 +6,28 @@ import (
 	"go.uber.org/fx"
 	"taskem-server/internal/config"
 	"taskem-server/internal/pkg/jwt"
+	"taskem-server/internal/repositories/token"
 	"taskem-server/internal/repositories/user"
 )
 
 type Opts struct {
 	fx.In
-	UserRepo user.Repository
-	Config   config.Config
+	UserRepo  user.Repository
+	Config    config.Config
+	RedisRepo token.Repository
 }
 
 type Auth struct {
-	userRepo user.Repository
-	config   config.Config
+	userRepo  user.Repository
+	config    config.Config
+	redisRepo token.Repository
 }
 
 func New(opts Opts) *Auth {
 	return &Auth{
-		userRepo: opts.UserRepo,
-		config:   opts.Config,
+		userRepo:  opts.UserRepo,
+		config:    opts.Config,
+		redisRepo: opts.RedisRepo,
 	}
 }
 
@@ -42,7 +46,7 @@ func (a *Auth) Login(ctx context.Context, opts LoginOpts) (resp *LoginResponse, 
 		return nil, ErrPwdMatch
 	}
 
-	token, err := jwt.NewToken(jwt.Opts{
+	access, err := jwt.NewToken(jwt.Opts{
 		ID:       u.ID,
 		Duration: a.config.TokenTtl,
 		Email:    u.Email,
@@ -63,7 +67,7 @@ func (a *Auth) Login(ctx context.Context, opts LoginOpts) (resp *LoginResponse, 
 	}
 
 	return &LoginResponse{
-		Token:        token,
+		Token:        access,
 		RefreshToken: refresh,
 		TokenType:    "Bearer",
 	}, nil
@@ -91,14 +95,14 @@ func (a *Auth) Registration(ctx context.Context, opts RegistrationOpts) error {
 func (a *Auth) RefreshToken(ctx context.Context, opts RefreshTokenOpts) (resp *LoginResponse, err error) {
 	u, err := a.userRepo.FindByID(ctx, opts.UserID)
 
-	token, err := jwt.NewToken(jwt.Opts{
+	access, err := jwt.NewToken(jwt.Opts{
 		ID:       u.ID,
 		Duration: a.config.TokenTtl,
 		Email:    u.Email,
 		Secret:   a.config.TokenSecret,
 	})
 	if err != nil {
-		return nil, err
+		return nil, ErrTokenGen
 	}
 
 	refresh, err := jwt.NewToken(jwt.Opts{
@@ -111,8 +115,28 @@ func (a *Auth) RefreshToken(ctx context.Context, opts RefreshTokenOpts) (resp *L
 		return nil, ErrTokenGen
 	}
 
+	err = a.redisRepo.SetToken(ctx, token.CreateOpts{
+		ID:        u.ID,
+		TokenType: "access",
+		Token:     access,
+		Duration:  a.config.TokenTtl,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	err = a.redisRepo.SetToken(ctx, token.CreateOpts{
+		ID:        u.ID,
+		TokenType: "refresh",
+		Token:     refresh,
+		Duration:  a.config.RefreshTokenTtl,
+	})
+	if err != nil {
+		return nil, err
+	}
+
 	return &LoginResponse{
-		Token:        token,
+		Token:        access,
 		RefreshToken: refresh,
 		TokenType:    "Bearer",
 	}, nil

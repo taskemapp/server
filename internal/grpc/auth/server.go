@@ -77,7 +77,10 @@ func (s *Server) Login(
 	}, nil
 }
 
-func (s *Server) SignUp(ctx context.Context, req *v1.SignupRequest) (*emptypb.Empty, error) {
+func (s *Server) SignUp(
+	ctx context.Context,
+	req *v1.SignupRequest,
+) (*emptypb.Empty, error) {
 	if req.UserName == "" {
 		return nil, status.Error(codes.InvalidArgument, "Missing argument: user_name")
 	}
@@ -120,7 +123,12 @@ func (s *Server) RefreshToken(
 
 	//TODO: сделать Redis
 
-	payload, err := grpc.ExtractTokenPayload(ctx, s.config.TokenSecret)
+	token, err := grpc.ExtractToken(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	payload, err := grpc.ExtractTokenPayload(ctx, s.config.TokenSecret, token)
 	if err != nil {
 		return nil, err
 	}

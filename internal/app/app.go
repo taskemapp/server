@@ -122,19 +122,15 @@ func setupPgPool(c config.Config) (*pgxpool.Pool, error) {
 }
 
 func setupRedisClient(c config.Config) (*redis.Client, error) {
-	// Разбор URL
 	redisURL, err := url.Parse(c.RedisURL)
 	if err != nil {
 		return nil, err
 	}
 
-	// Извлечение хоста и порта
 	addr := redisURL.Host
 
-	// Извлечение пароля
 	password, _ := redisURL.User.Password()
 
-	// Извлечение базы данных (если есть)
 	var db int
 	if redisURL.Path != "" {
 		fmt.Sscanf(redisURL.Path, "/%d", &db)
@@ -142,11 +138,10 @@ func setupRedisClient(c config.Config) (*redis.Client, error) {
 
 	rdb := redis.NewClient(&redis.Options{
 		Addr:     addr,
-		Password: password, // Если пароля нет, оставьте пустым
-		DB:       db,       // Если базы данных нет, оставьте 0
+		Password: password,
+		DB:       db,
 	})
 
-	// Проверяем подключение
 	_, err = rdb.Ping(context.Background()).Result()
 	if err != nil {
 		return nil, err

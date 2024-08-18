@@ -66,6 +66,26 @@ func (a *Auth) Login(ctx context.Context, opts LoginOpts) (resp *LoginResponse, 
 		return nil, ErrTokenGen
 	}
 
+	err = a.redisRepo.SetToken(ctx, token.CreateOpts{
+		ID:        u.ID,
+		TokenType: "access",
+		Token:     access,
+		Duration:  a.config.TokenTtl,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	err = a.redisRepo.SetToken(ctx, token.CreateOpts{
+		ID:        u.ID,
+		TokenType: "refresh",
+		Token:     refresh,
+		Duration:  a.config.RefreshTokenTtl,
+	})
+	if err != nil {
+		return nil, err
+	}
+
 	return &LoginResponse{
 		Token:        access,
 		RefreshToken: refresh,

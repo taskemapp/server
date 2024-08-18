@@ -34,7 +34,7 @@ func (rc *Client) SetToken(ctx context.Context, opts CreateOpts) error {
 func (rc *Client) GetToken(ctx context.Context, key string) (string, error) {
 	val, err := rc.client.Get(ctx, key).Result()
 	if errors.Is(err, redis.Nil) {
-		return "", nil // Ключ не найден
+		return "", ErrNotFound
 	}
 	return val, err
 }

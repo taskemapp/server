@@ -25,13 +25,15 @@ func NewToken(opts Opts) (token string, err error) {
 	}
 
 	claims := jwt.MapClaims{
-		"uid": opts.ID,
-		"exp": time.Now().Add(opts.Duration).Unix(),
-		"iat": time.Now().Unix(),
+		"uid":  opts.ID,
+		"exp":  time.Now().Add(opts.Duration).Unix(),
+		"iat":  time.Now().Unix(),
+		"type": "refresh",
 	}
 
 	if opts.Email != "" {
 		claims["email"] = opts.Email
+		claims["type"] = "access"
 	}
 
 	t := jwt.NewWithClaims(

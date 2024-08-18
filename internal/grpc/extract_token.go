@@ -3,11 +3,13 @@ package grpc
 import (
 	"context"
 	"errors"
+	"fmt"
 	jwt2 "github.com/golang-jwt/jwt/v5"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
 	"taskem-server/internal/pkg/jwt"
+	"taskem-server/internal/repositories/token"
 )
 
 const authMDKey = "authorization"
@@ -36,18 +38,14 @@ func ExtractToken(ctx context.Context) (*string, error) {
 func ExtractTokenPayload(
 	ctx context.Context,
 	secret string,
-	tokenOpt ...*string,
+	redisRepo token.Repository,
 ) (jwt2.MapClaims, error) {
 	var tokenStr string
-	if len(tokenOpt) > 0 && tokenOpt[0] != nil {
-		tokenStr = *tokenOpt[0]
-	} else {
-		token, err := ExtractToken(ctx)
-		if err != nil {
-			return nil, err
-		}
-		tokenStr = *token
+	extractToken, err := ExtractToken(ctx)
+	if err != nil {
+		return nil, err
 	}
+	tokenStr = *extractToken
 
 	payload, err := jwt.GetPayload(tokenStr, secret)
 
@@ -59,6 +57,18 @@ func ExtractTokenPayload(
 			return nil, status.Errorf(codes.InvalidArgument, "Token parse error")
 		case errors.Is(err, jwt.ErrTokenValidation):
 			return nil, status.Errorf(codes.Unauthenticated, "Token validation error")
+		default:
+			return nil, status.Errorf(codes.Internal, "Internal error")
+		}
+	}
+
+	claims := *payload
+
+	_, err = redisRepo.GetToken(ctx, fmt.Sprintf("%s:%s", claims["type"].(string), claims["uid"].(string)))
+	if err != nil {
+		switch {
+		case errors.Is(err, token.ErrNotFound):
+			return nil, status.Errorf(codes.Unauthenticated, "Token is not exist")
 		default:
 			return nil, status.Errorf(codes.Internal, "Internal error")
 		}

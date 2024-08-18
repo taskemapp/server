@@ -11,6 +11,7 @@ import (
 	"google.golang.org/protobuf/types/known/emptypb"
 	"taskem-server/internal/config"
 	"taskem-server/internal/grpc"
+	"taskem-server/internal/repositories/token"
 	"taskem-server/internal/repositories/user"
 	"taskem-server/internal/service/auth"
 	"taskem-server/tools/gen/grpc/v1"
@@ -18,23 +19,26 @@ import (
 
 type Opts struct {
 	fx.In
-	Auth   auth.Service
-	Logger *zap.Logger
-	Config config.Config
+	Auth      auth.Service
+	Logger    *zap.Logger
+	Config    config.Config
+	RedisRepo token.Repository
 }
 
 type Server struct {
 	v1.UnimplementedAuthServer
-	auth   auth.Service
-	logger *zap.Logger
-	config config.Config
+	auth      auth.Service
+	logger    *zap.Logger
+	config    config.Config
+	redisRepo token.Repository
 }
 
 func New(opts Opts) *Server {
 	return &Server{
-		auth:   opts.Auth,
-		logger: opts.Logger,
-		config: opts.Config,
+		auth:      opts.Auth,
+		logger:    opts.Logger,
+		config:    opts.Config,
+		redisRepo: opts.RedisRepo,
 	}
 }
 
@@ -112,23 +116,8 @@ func (s *Server) RefreshToken(
 	ctx context.Context,
 	req *emptypb.Empty,
 ) (*v1.RefreshTokenResponse, error) {
+	payload, err := grpc.ExtractTokenPayload(ctx, s.config.TokenSecret, s.redisRepo)
 
-	//token, err := grpc.ExtractToken(ctx)
-	//
-	//if err != nil {
-	//	return nil, err
-	//}
-	//
-	//var tokenStr = *token
-
-	//TODO: сделать Redis
-
-	token, err := grpc.ExtractToken(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	payload, err := grpc.ExtractTokenPayload(ctx, s.config.TokenSecret, token)
 	if err != nil {
 		return nil, err
 	}

@@ -13,6 +13,7 @@ import (
 	"taskem-server/internal/config"
 	"taskem-server/internal/grpc"
 	"taskem-server/internal/mapper"
+	"taskem-server/internal/repositories/token"
 	"taskem-server/internal/service"
 	"taskem-server/internal/service/team"
 	v1 "taskem-server/tools/gen/grpc/v1"
@@ -20,28 +21,31 @@ import (
 
 type Opts struct {
 	fx.In
-	Team   team.Service
-	Config config.Config
-	Logger *zap.Logger
+	Team      team.Service
+	Config    config.Config
+	Logger    *zap.Logger
+	RedisRepo token.Repository
 }
 
 type Server struct {
 	v1.UnimplementedTeamServer
-	team   team.Service
-	config config.Config
-	logger *zap.Logger
+	team      team.Service
+	config    config.Config
+	logger    *zap.Logger
+	redisRepo token.Repository
 }
 
 func New(opts Opts) *Server {
 	return &Server{
-		team:   opts.Team,
-		config: opts.Config,
-		logger: opts.Logger,
+		team:      opts.Team,
+		config:    opts.Config,
+		logger:    opts.Logger,
+		redisRepo: opts.RedisRepo,
 	}
 }
 
 func (t *Server) Get(ctx context.Context, request *v1.GetTeamRequest) (*v1.TeamResponse, error) {
-	payload, err := grpc.ExtractTokenPayload(ctx, t.config.TokenSecret)
+	payload, err := grpc.ExtractTokenPayload(ctx, t.config.TokenSecret, t.redisRepo)
 	if err != nil {
 		return nil, err
 	}
@@ -60,7 +64,7 @@ func (t *Server) Get(ctx context.Context, request *v1.GetTeamRequest) (*v1.TeamR
 }
 
 func (t *Server) GetUserTeams(ctx context.Context, empty *emptypb.Empty) (*v1.GetAllTeamsResponse, error) {
-	payload, err := grpc.ExtractTokenPayload(ctx, t.config.TokenSecret)
+	payload, err := grpc.ExtractTokenPayload(ctx, t.config.TokenSecret, t.redisRepo)
 	if err != nil {
 		return nil, err
 	}
@@ -89,7 +93,7 @@ func (t *Server) GetAllCanJoin(ctx context.Context, empty *emptypb.Empty) (*v1.G
 }
 
 func (t *Server) Create(ctx context.Context, request *v1.CreateTeamRequest) (*v1.CreateTeamResponse, error) {
-	payload, err := grpc.ExtractTokenPayload(ctx, t.config.TokenSecret)
+	payload, err := grpc.ExtractTokenPayload(ctx, t.config.TokenSecret, t.redisRepo)
 	if err != nil {
 		return nil, err
 	}

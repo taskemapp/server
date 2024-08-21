@@ -46,7 +46,7 @@ func New(opts Opts) *Server {
 }
 
 func (t *Server) Get(ctx context.Context, request *v1.GetTeamRequest) (*v1.TeamResponse, error) {
-	payload := (ctx.Value(interceptors.TokenPayload)).(jwt.MapClaims)
+	payload := (ctx.Value(interceptors.TokenPayload{})).(jwt.MapClaims)
 
 	var uid uuid.UUID
 	uid, err := uuid.Parse(payload["uid"].(string))
@@ -62,7 +62,7 @@ func (t *Server) Get(ctx context.Context, request *v1.GetTeamRequest) (*v1.TeamR
 }
 
 func (t *Server) GetUserTeams(ctx context.Context, empty *emptypb.Empty) (*v1.GetAllTeamsResponse, error) {
-	payload := (ctx.Value(interceptors.TokenPayload)).(jwt.MapClaims)
+	payload := (ctx.Value(interceptors.TokenPayload{})).(jwt.MapClaims)
 
 	var uid uuid.UUID
 	uid, err := uuid.Parse(payload["uid"].(string))
@@ -88,7 +88,7 @@ func (t *Server) GetAllCanJoin(ctx context.Context, empty *emptypb.Empty) (*v1.G
 }
 
 func (t *Server) Create(ctx context.Context, request *v1.CreateTeamRequest) (*v1.CreateTeamResponse, error) {
-	payload := (ctx.Value(interceptors.TokenPayload)).(jwt.MapClaims)
+	payload := (ctx.Value(interceptors.TokenPayload{})).(jwt.MapClaims)
 
 	var uid uuid.UUID
 	uid, err := uuid.Parse(payload["uid"].(string))

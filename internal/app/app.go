@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"github.com/go-redis/redis/v8"
 	"github.com/jackc/pgx/v5/pgxpool"
 	_ "github.com/jackc/pgx/v5/stdlib"
 	"github.com/pressly/goose/v3"
@@ -12,6 +13,7 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 	"net"
+	"net/url"
 	"os"
 	"path/filepath"
 	"taskem-server/internal/app/auth"
@@ -19,6 +21,7 @@ import (
 	"taskem-server/internal/app/task"
 	"taskem-server/internal/app/team"
 	"taskem-server/internal/config"
+	"taskem-server/internal/grpc/interceptors"
 )
 
 const (
@@ -30,11 +33,13 @@ var App = fx.Options(
 	fx.Provide(setupConfig),
 	fx.Provide(setupLogger),
 	fx.Provide(setupPgPool),
+	fx.Provide(setupRedisClient),
 
 	auth.App,
 	team.App,
 	task.App,
 
+	fx.Provide(interceptors.New),
 	fx.Provide(grpcsrv.New),
 
 	fx.Invoke(
@@ -116,4 +121,33 @@ func setupLogger(c config.Config) *zap.Logger {
 
 func setupPgPool(c config.Config) (*pgxpool.Pool, error) {
 	return pgxpool.New(context.Background(), c.PostgresUrl)
+}
+
+func setupRedisClient(c config.Config) (*redis.Client, error) {
+	redisURL, err := url.Parse(c.RedisURL)
+	if err != nil {
+		return nil, err
+	}
+
+	addr := redisURL.Host
+
+	password, _ := redisURL.User.Password()
+
+	var db int
+	if redisURL.Path != "" {
+		fmt.Sscanf(redisURL.Path, "/%d", &db)
+	}
+
+	rdb := redis.NewClient(&redis.Options{
+		Addr:     addr,
+		Password: password,
+		DB:       db,
+	})
+
+	_, err = rdb.Ping(context.Background()).Result()
+	if err != nil {
+		return nil, err
+	}
+
+	return rdb, nil
 }

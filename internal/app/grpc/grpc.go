@@ -3,14 +3,17 @@ package grpc
 import (
 	"context"
 	"fmt"
+	authMd "github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/auth"
 	"github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/logging"
 	"github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/recovery"
+	"github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/selector"
 	"go.uber.org/fx"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"taskem-server/internal/grpc/auth"
+	"taskem-server/internal/grpc/interceptors"
 	"taskem-server/internal/grpc/team"
 	v1 "taskem-server/tools/gen/grpc/v1"
 )
@@ -20,6 +23,7 @@ type Opts struct {
 	AuthServer *auth.Server
 	TeamServer *team.Server
 	Log        *zap.Logger
+	Ic         *interceptors.Interceptor
 }
 
 type App struct {
@@ -44,10 +48,12 @@ func New(opts Opts) App {
 
 	srv := grpc.NewServer(
 		grpc.ChainUnaryInterceptor(
+			selector.UnaryServerInterceptor(authMd.UnaryServerInterceptor(opts.Ic.Auth), selector.MatchFunc(opts.Ic.AuthMatcher)),
 			recovery.UnaryServerInterceptor(recoveryOpts...),
 			logging.UnaryServerInterceptor(interceptorLogger(opts.Log), logOpts...),
 		),
 		grpc.ChainStreamInterceptor(
+			selector.StreamServerInterceptor(authMd.StreamServerInterceptor(opts.Ic.Auth), selector.MatchFunc(opts.Ic.AuthMatcher)),
 			recovery.StreamServerInterceptor(recoveryOpts...),
 			logging.StreamServerInterceptor(interceptorLogger(opts.Log), logOpts...),
 		),

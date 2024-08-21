@@ -19,7 +19,7 @@ type Config struct {
 	TokenSecret     string        `envconfig:"TOKEN_SECRET" required:"true"`
 
 	PostgresUrl string `envconfig:"POSTGRES_URL" required:"true"`
-	RedisURL    string `envconfig:"REDIS_URL" required:"true" ignored:"true"`
+	RedisURL    string `envconfig:"REDIS_URL" required:"true"`
 
 	S3Host        string `envconfig:"S3_HOST"`
 	S3AccessToken string `envconfig:"S3_ACCESS_TOKEN"`

@@ -7,6 +7,7 @@ import (
 	"go.uber.org/zap"
 	"taskem-server/internal/repositories/team"
 	"taskem-server/internal/repositories/team_member"
+	"taskem-server/internal/repositories/token"
 	"taskem-server/internal/service"
 )
 
@@ -15,12 +16,14 @@ type Opts struct {
 	TeamRepo       team.Repository
 	TeamMemberRepo team_member.Repository
 	Logger         *zap.Logger
+	RedisRepo      token.Repository
 }
 
 type Team struct {
 	teamRepo       team.Repository
 	teamMemberRepo team_member.Repository
 	logger         *zap.Logger
+	redisRepo      token.Repository
 }
 
 func New(opts Opts) *Team {
@@ -28,6 +31,7 @@ func New(opts Opts) *Team {
 		teamRepo:       opts.TeamRepo,
 		teamMemberRepo: opts.TeamMemberRepo,
 		logger:         opts.Logger,
+		redisRepo:      opts.RedisRepo,
 	}
 }
 

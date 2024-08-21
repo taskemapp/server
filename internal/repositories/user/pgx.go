@@ -172,6 +172,8 @@ func (p *Pgx) FindByID(ctx context.Context, userID uuid.UUID) (*User, error) {
 		&user.Password,
 		&user.IsVerified,
 		&user.AvatarUrl,
+		&user.CreatedAt,
+		&user.EditedAt,
 	)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {

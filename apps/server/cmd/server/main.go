@@ -2,13 +2,11 @@ package main
 
 import (
 	"context"
+	"github.com/taskemapp/server/apps/server/internal/app"
 	"go.uber.org/fx"
-	"server/internal/app"
-	"time"
 )
 
 func main() {
-	time.Sleep(time.Hour)
 	a := fx.New(
 		app.App,
 	)

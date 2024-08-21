@@ -16,6 +16,30 @@ services:
       timeout: 5s
       retries: 5
 
+  smtp:
+    image: ghcr.io/docker-mailserver/docker-mailserver:latest
+    restart: unless-stopped
+
+
+  listmonk:
+    image: listmonk/listmonk:latest
+    restart: unless-stopped
+    depends_on:
+      - db
+    ports:
+      - "9000:9000"
+    command: [ sh, -c, "yes | ./listmonk --install --config=\"\" && ./listmonk" ]
+    environment:
+      LISTMONK_app__address: "0.0.0.0:9000"
+      LISTMONK_app__admin_username: taskem
+      LISTMONK_app__admin_password: taskem
+      LISTMONK_db__host: db
+      LISTMONK_db__port: 5432
+      LISTMONK_db__user: taskem
+      LISTMONK_db__password: taskem
+      LISTMONK_db__database: taskem
+      LISTMONK_db__ssl_mode: disable
+
   #  redis:
   #    image: redis
   #    restart: always
@@ -54,12 +78,14 @@ services:
       - "8080:15672"
 
   server:
-    env_file: ".env.dev"
+    env_file: .env.dev
     build:
       context: ./apps/server/
       target: final
     depends_on:
       - db
+      - rabbitmq
+      - smtp
     ports:
       - "50051:50051"
 

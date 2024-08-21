@@ -2,9 +2,9 @@ package main
 
 import (
 	"context"
+	"github.com/taskemapp/server/apps/notification/internal/app"
 	"go.uber.org/fx"
 	"log"
-	"notification/internal/app"
 )
 
 func main() {

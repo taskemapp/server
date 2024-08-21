@@ -30,4 +30,5 @@ type RegistrationOpts struct {
 
 type RefreshTokenOpts struct {
 	UserID uuid.UUID
+	Token  string
 }

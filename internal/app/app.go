@@ -21,6 +21,7 @@ import (
 	"taskem-server/internal/app/task"
 	"taskem-server/internal/app/team"
 	"taskem-server/internal/config"
+	"taskem-server/internal/grpc/interceptors"
 )
 
 const (
@@ -38,6 +39,7 @@ var App = fx.Options(
 	team.App,
 	task.App,
 
+	fx.Provide(interceptors.New),
 	fx.Provide(grpcsrv.New),
 
 	fx.Invoke(

@@ -2,6 +2,7 @@ package auth
 
 import (
 	"context"
+	"fmt"
 	"github.com/alexedwards/argon2id"
 	"go.uber.org/fx"
 	"taskem-server/internal/config"
@@ -14,20 +15,20 @@ type Opts struct {
 	fx.In
 	UserRepo  user.Repository
 	Config    config.Config
-	RedisRepo token.Repository
+	TokenRepo token.Repository
 }
 
 type Auth struct {
 	userRepo  user.Repository
 	config    config.Config
-	redisRepo token.Repository
+	tokenRepo token.Repository
 }
 
 func New(opts Opts) *Auth {
 	return &Auth{
 		userRepo:  opts.UserRepo,
 		config:    opts.Config,
-		redisRepo: opts.RedisRepo,
+		tokenRepo: opts.TokenRepo,
 	}
 }
 
@@ -66,7 +67,7 @@ func (a *Auth) Login(ctx context.Context, opts LoginOpts) (resp *LoginResponse, 
 		return nil, ErrTokenGen
 	}
 
-	err = a.redisRepo.SetToken(ctx, token.CreateOpts{
+	err = a.tokenRepo.SetToken(ctx, token.CreateOpts{
 		ID:        u.ID,
 		TokenType: "access",
 		Token:     access,
@@ -76,7 +77,7 @@ func (a *Auth) Login(ctx context.Context, opts LoginOpts) (resp *LoginResponse, 
 		return nil, err
 	}
 
-	err = a.redisRepo.SetToken(ctx, token.CreateOpts{
+	err = a.tokenRepo.SetToken(ctx, token.CreateOpts{
 		ID:        u.ID,
 		TokenType: "refresh",
 		Token:     refresh,
@@ -113,7 +114,16 @@ func (a *Auth) Registration(ctx context.Context, opts RegistrationOpts) error {
 }
 
 func (a *Auth) RefreshToken(ctx context.Context, opts RefreshTokenOpts) (resp *LoginResponse, err error) {
+	_, err = a.tokenRepo.GetToken(ctx, fmt.Sprintf("%s:%s", jwt.Refresh, opts.UserID))
+	if err != nil {
+
+		return nil, err
+	}
+
 	u, err := a.userRepo.FindByID(ctx, opts.UserID)
+	if err != nil {
+		return nil, err
+	}
 
 	access, err := jwt.NewToken(jwt.Opts{
 		ID:       u.ID,
@@ -135,7 +145,7 @@ func (a *Auth) RefreshToken(ctx context.Context, opts RefreshTokenOpts) (resp *L
 		return nil, ErrTokenGen
 	}
 
-	err = a.redisRepo.SetToken(ctx, token.CreateOpts{
+	err = a.tokenRepo.SetToken(ctx, token.CreateOpts{
 		ID:        u.ID,
 		TokenType: "access",
 		Token:     access,
@@ -145,7 +155,7 @@ func (a *Auth) RefreshToken(ctx context.Context, opts RefreshTokenOpts) (resp *L
 		return nil, err
 	}
 
-	err = a.redisRepo.SetToken(ctx, token.CreateOpts{
+	err = a.tokenRepo.SetToken(ctx, token.CreateOpts{
 		ID:        u.ID,
 		TokenType: "refresh",
 		Token:     refresh,

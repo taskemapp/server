@@ -7,6 +7,19 @@ import (
 	"time"
 )
 
+// TokenType existing token types:
+// Access, Refresh
+//
+// using for creating tokens with `type` in claims
+type TokenType string
+
+const (
+	// Access token type see TokenType for more info
+	Access TokenType = "access"
+	// Refresh token type see TokenType for more info
+	Refresh = "refresh"
+)
+
 type Opts struct {
 	ID       uuid.UUID
 	Email    string
@@ -28,12 +41,12 @@ func NewToken(opts Opts) (token string, err error) {
 		"uid":  opts.ID,
 		"exp":  time.Now().Add(opts.Duration).Unix(),
 		"iat":  time.Now().Unix(),
-		"type": "refresh",
+		"type": Refresh,
 	}
 
 	if opts.Email != "" {
 		claims["email"] = opts.Email
-		claims["type"] = "access"
+		claims["type"] = Access
 	}
 
 	t := jwt.NewWithClaims(

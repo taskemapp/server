@@ -9,11 +9,11 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/emptypb"
-	"taskem-server/internal/config"
-	"taskem-server/internal/grpc"
-	"taskem-server/internal/repositories/token"
 	"regexp"
+	"taskem-server/internal/config"
+	"taskem-server/internal/pkg/jwt"
 	"taskem-server/internal/pkg/validation"
+	"taskem-server/internal/repositories/token"
 	"taskem-server/internal/repositories/user"
 	"taskem-server/internal/service/auth"
 	"taskem-server/tools/gen/grpc/v1"
@@ -24,7 +24,7 @@ type Opts struct {
 	Auth      auth.Service
 	Logger    *zap.Logger
 	Config    config.Config
-	RedisRepo token.Repository
+	TokenRepo token.Repository
 }
 
 type Server struct {
@@ -32,7 +32,7 @@ type Server struct {
 	auth      auth.Service
 	logger    *zap.Logger
 	config    config.Config
-	redisRepo token.Repository
+	tokenRepo token.Repository
 }
 
 func New(opts Opts) *Server {
@@ -40,7 +40,7 @@ func New(opts Opts) *Server {
 		auth:      opts.Auth,
 		logger:    opts.Logger,
 		config:    opts.Config,
-		redisRepo: opts.RedisRepo,
+		tokenRepo: opts.TokenRepo,
 	}
 }
 
@@ -73,7 +73,7 @@ func (s *Server) Login(
 		case errors.Is(err, auth.ErrPwdMatch):
 			return nil, status.Error(codes.InvalidArgument, "Wrong password")
 		}
-		return nil, err
+		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
 	return &v1.LoginResponse{
@@ -117,7 +117,7 @@ func (s *Server) SignUp(
 		})
 	if err != nil {
 		s.logger.Sugar().Error(err)
-		return nil, err
+		return nil, status.Error(codes.Internal, err.Error())
 	}
 
 	return &emptypb.Empty{}, nil
@@ -125,29 +125,31 @@ func (s *Server) SignUp(
 
 func (s *Server) RefreshToken(
 	ctx context.Context,
-	req *emptypb.Empty,
+	req *v1.RefreshTokenRequest,
 ) (*v1.RefreshTokenResponse, error) {
-	payload, err := grpc.ExtractTokenPayload(ctx, s.config.TokenSecret, s.redisRepo)
-
+	payload, err := jwt.GetPayload(req.Token, s.config.TokenSecret)
 	if err != nil {
-		return nil, err
+		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
 	var uid uuid.UUID
-	uid, err = uuid.Parse(payload["uid"].(string))
+	uid, err = uuid.Parse((*payload)["uid"].(string))
 
 	if err != nil {
-		return nil, err
+		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
 	resp, err := s.auth.RefreshToken(
 		ctx,
-		auth.RefreshTokenOpts{UserID: uid},
+		auth.RefreshTokenOpts{
+			UserID: uid,
+			Token:  req.Token,
+		},
 	)
 
 	if err != nil {
-		s.logger.Sugar().Error(err)
-		return nil, err
+		s.logger.Sugar().Warn(err)
+		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
 	return &v1.RefreshTokenResponse{

@@ -2,6 +2,7 @@ package team
 
 import (
 	"context"
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/pkg/errors"
@@ -11,7 +12,7 @@ import (
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/emptypb"
 	"taskem-server/internal/config"
-	"taskem-server/internal/grpc"
+	"taskem-server/internal/grpc/interceptors"
 	"taskem-server/internal/mapper"
 	"taskem-server/internal/repositories/token"
 	"taskem-server/internal/service"
@@ -45,13 +46,10 @@ func New(opts Opts) *Server {
 }
 
 func (t *Server) Get(ctx context.Context, request *v1.GetTeamRequest) (*v1.TeamResponse, error) {
-	payload, err := grpc.ExtractTokenPayload(ctx, t.config.TokenSecret, t.redisRepo)
-	if err != nil {
-		return nil, err
-	}
+	payload := (ctx.Value(interceptors.TokenPayload)).(jwt.MapClaims)
 
 	var uid uuid.UUID
-	uid, err = uuid.Parse(payload["uid"].(string))
+	uid, err := uuid.Parse(payload["uid"].(string))
 	if err != nil {
 		return nil, err
 	}
@@ -64,13 +62,10 @@ func (t *Server) Get(ctx context.Context, request *v1.GetTeamRequest) (*v1.TeamR
 }
 
 func (t *Server) GetUserTeams(ctx context.Context, empty *emptypb.Empty) (*v1.GetAllTeamsResponse, error) {
-	payload, err := grpc.ExtractTokenPayload(ctx, t.config.TokenSecret, t.redisRepo)
-	if err != nil {
-		return nil, err
-	}
+	payload := (ctx.Value(interceptors.TokenPayload)).(jwt.MapClaims)
 
 	var uid uuid.UUID
-	uid, err = uuid.Parse(payload["uid"].(string))
+	uid, err := uuid.Parse(payload["uid"].(string))
 	if err != nil {
 		return nil, err
 	}
@@ -93,21 +88,18 @@ func (t *Server) GetAllCanJoin(ctx context.Context, empty *emptypb.Empty) (*v1.G
 }
 
 func (t *Server) Create(ctx context.Context, request *v1.CreateTeamRequest) (*v1.CreateTeamResponse, error) {
-	payload, err := grpc.ExtractTokenPayload(ctx, t.config.TokenSecret, t.redisRepo)
-	if err != nil {
-		return nil, err
-	}
+	payload := (ctx.Value(interceptors.TokenPayload)).(jwt.MapClaims)
 
 	var uid uuid.UUID
-	uid, err = uuid.Parse(payload["uid"].(string))
+	uid, err := uuid.Parse(payload["uid"].(string))
 	if err != nil {
 		return nil, err
 	}
 
 	c, err := t.team.Create(ctx, team.CreateOpts{
 		CreatorID:   uid,
-		Name:        "",
-		Description: "",
+		Name:        request.Name,
+		Description: request.Description,
 	})
 	if err != nil {
 		t.logger.Sugar().Error(err)

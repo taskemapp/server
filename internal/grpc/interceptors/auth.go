@@ -12,8 +12,8 @@ import (
 	"taskem-server/internal/repositories/token"
 )
 
-const TokenKey = "token"
-const TokenPayload = "tokenPayload"
+type TokenKey struct{}
+type TokenPayload struct{}
 
 // Auth get token from grpc request metadata
 //
@@ -52,8 +52,8 @@ func (i *Interceptor) Auth(ctx context.Context) (context.Context, error) {
 	}
 
 	ctx = logging.InjectFields(ctx, logging.Fields{"auth.sub", payload})
-	ctx = context.WithValue(ctx, TokenKey, tokenMd)
-	ctx = context.WithValue(ctx, TokenPayload, payload)
+	ctx = context.WithValue(ctx, TokenKey{}, tokenMd)
+	ctx = context.WithValue(ctx, TokenPayload{}, payload)
 
 	return ctx, nil
 }

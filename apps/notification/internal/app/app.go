@@ -28,7 +28,7 @@ var App = fx.Options(
 		func(logger *zap.Logger, c config.Config, mq *broker.Mq, e notifier.EmailNotifier) {
 			logger.Sugar().Info("Starting app: env - ", c.AppEnv)
 			go func() {
-				err := mq.Receive("notifications")
+				err := mq.Receive(broker.NotificationChannel)
 				if err != nil {
 					logger.Fatal("Error starting app", zap.Error(err))
 				}

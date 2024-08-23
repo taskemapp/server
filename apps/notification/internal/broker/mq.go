@@ -1,8 +1,10 @@
 package broker
 
 import (
+	"encoding/json"
 	"fmt"
 	amqp "github.com/rabbitmq/amqp091-go"
+	"github.com/taskemapp/server/apps/notification/pkg/notifier"
 	"go.uber.org/fx"
 	"go.uber.org/zap"
 	"log"
@@ -30,7 +32,7 @@ func New(opts Opts) *Mq {
 	}
 }
 
-func (m *Mq) Receive(queueName string) error {
+func (m *Mq) Receive(queueName Channel) error {
 	ch, err := m.conn.Channel()
 	if err != nil {
 		return err
@@ -38,7 +40,7 @@ func (m *Mq) Receive(queueName string) error {
 	defer ch.Close()
 
 	q, err := ch.QueueDeclare(
-		queueName,
+		string(queueName),
 		false,
 		false,
 		false,
@@ -71,7 +73,12 @@ func (m *Mq) Receive(queueName string) error {
 		m.log.Sugar().Info("Start listen")
 		defer m.wg.Done()
 		for msg := range consumer {
-			log.Printf("Received a message: %s", msg.Body)
+			var n notifier.Notification
+			err = json.Unmarshal(msg.Body, &n)
+			if err != nil {
+				return
+			}
+			log.Printf("Received a message: %s", n)
 		}
 		m.log.Sugar().Info("Done listen")
 

@@ -16,20 +16,20 @@ type Opts struct {
 	fx.In
 	UserRepo user.Repository
 	Config   config.Config
-	Mq       broker.Mq
+	Br       broker.Broker
 }
 
 type Auth struct {
 	userRepo user.Repository
 	config   config.Config
-	mq       broker.Mq
+	br       broker.Broker
 }
 
 func New(opts Opts) *Auth {
 	return &Auth{
 		userRepo: opts.UserRepo,
 		config:   opts.Config,
-		mq:       opts.Mq,
+		br:       opts.Br,
 	}
 }
 
@@ -77,7 +77,7 @@ func (a *Auth) Login(ctx context.Context, opts LoginOpts) (resp *LoginResponse, 
 	if err != nil {
 		return nil, err
 	}
-	err = a.mq.Send(broker.SendOpts{
+	err = a.br.Send(broker.SendOpts{
 		Body: body,
 	}, broker.NotificationChannel)
 

@@ -2,7 +2,10 @@ package auth
 
 import (
 	"context"
+	"encoding/json"
 	"github.com/alexedwards/argon2id"
+	"github.com/taskemapp/server/apps/notification/pkg/notifier"
+	"github.com/taskemapp/server/apps/server/internal/broker"
 	"github.com/taskemapp/server/apps/server/internal/config"
 	"github.com/taskemapp/server/apps/server/internal/pkg/jwt"
 	"github.com/taskemapp/server/apps/server/internal/repositories/user"
@@ -13,17 +16,20 @@ type Opts struct {
 	fx.In
 	UserRepo user.Repository
 	Config   config.Config
+	Mq       broker.Mq
 }
 
 type Auth struct {
 	userRepo user.Repository
 	config   config.Config
+	mq       broker.Mq
 }
 
 func New(opts Opts) *Auth {
 	return &Auth{
 		userRepo: opts.UserRepo,
 		config:   opts.Config,
+		mq:       opts.Mq,
 	}
 }
 
@@ -60,6 +66,23 @@ func (a *Auth) Login(ctx context.Context, opts LoginOpts) (resp *LoginResponse, 
 
 	if err != nil {
 		return nil, ErrTokenGen
+	}
+
+	body, err := json.Marshal(notifier.Notification{
+		Type:      notifier.EmailNotify,
+		Recipient: opts.Email,
+		Subject:   "OTP",
+		Message:   "otp",
+	})
+	if err != nil {
+		return nil, err
+	}
+	err = a.mq.Send(broker.SendOpts{
+		Body: body,
+	}, broker.NotificationChannel)
+
+	if err != nil {
+		return nil, err
 	}
 
 	return &LoginResponse{

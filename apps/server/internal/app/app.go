@@ -18,7 +18,6 @@ import (
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
-	"log"
 	"net"
 )
 
@@ -41,15 +40,6 @@ var App = fx.Options(
 	fx.Provide(grpcsrv.New),
 
 	fx.Invoke(
-		func(mq broker.Broker) {
-			err := mq.Send(
-				broker.SendOpts{Body: []byte("text")},
-				"email",
-			)
-			if err != nil {
-				log.Print(err)
-			}
-		},
 		func(p *pgxpool.Pool, c config.Config, log *zap.Logger) error {
 			if err := goose.SetDialect("pgx"); err != nil {
 				log.Sugar().Error("Failed to set dialect: ", err)

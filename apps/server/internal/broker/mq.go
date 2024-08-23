@@ -2,7 +2,6 @@ package broker
 
 import (
 	"context"
-	"github.com/go-faster/errors"
 	amqp "github.com/rabbitmq/amqp091-go"
 	"go.uber.org/fx"
 	"go.uber.org/zap"
@@ -27,16 +26,16 @@ func New(opts Opts) *Mq {
 	}
 }
 
-func (m *Mq) Send(opts SendOpts, chName string) error {
+func (m *Mq) Send(opts SendOpts, chName Channel) error {
 	ch, err := m.conn.Channel()
 	if err != nil {
-		m.log.Sugar().Error(errors.Wrap(err, "Failed open channel"))
+		m.log.Sugar().Errorf("Failed open channel: %s", err)
 		return err
 	}
 	defer ch.Close()
 
 	q, err := ch.QueueDeclare(
-		chName,
+		string(chName),
 		false,
 		false,
 		false,
@@ -44,7 +43,7 @@ func (m *Mq) Send(opts SendOpts, chName string) error {
 		nil,
 	)
 	if err != nil {
-		m.log.Sugar().Error(errors.Wrap(err, "Failed queue declare"))
+		m.log.Sugar().Errorf("Failed queue declare: %s", err)
 		return err
 	}
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
@@ -60,11 +59,10 @@ func (m *Mq) Send(opts SendOpts, chName string) error {
 			Headers:     opts.Headers,
 			ContentType: opts.ContentType,
 			Timestamp:   time.Now(),
-			UserId:      "asdasdasdasdasdasdsadsa",
 			Body:        opts.Body,
 		})
 	if err != nil {
-		m.log.Sugar().Error(errors.Wrap(err, "failed to send message"))
+		m.log.Sugar().Errorf("Failed to send message: %s", err)
 		return err
 	}
 	return nil

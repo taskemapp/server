@@ -13,16 +13,30 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        module:
+          - ./apps/notification
+          - ./apps/server
+
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 2
+
       - uses: actions/setup-go@v5
         with:
-          go-version: '1.22'
+          go-version: '1.23'
+
       - name: Run coverage
-        run: go test -race -coverprofile=coverage.out -covermode=atomic ./...
+        working-directory: ${{ matrix.module }}
+        run: |
+          go test -race -coverprofile=coverage.out -covermode=atomic ./...
+
       - name: Upload coverage reports to Codecov
         uses: codecov/codecov-action@v4
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
+          files: ${{ matrix.module }}/coverage.out
+          flags: ${{ matrix.module }}

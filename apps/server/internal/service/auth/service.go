@@ -2,42 +2,36 @@ package auth
 
 import (
 	"context"
-	"fmt"
 	"encoding/json"
+	"fmt"
 	"github.com/alexedwards/argon2id"
 	"github.com/taskemapp/server/apps/notification/pkg/notifier"
 	"github.com/taskemapp/server/apps/server/internal/broker"
 	"github.com/taskemapp/server/apps/server/internal/config"
 	"github.com/taskemapp/server/apps/server/internal/pkg/jwt"
+	"github.com/taskemapp/server/apps/server/internal/repositories/token"
 	"github.com/taskemapp/server/apps/server/internal/repositories/user"
 	"go.uber.org/fx"
-	"taskem-server/internal/config"
-	"taskem-server/internal/pkg/jwt"
-	"taskem-server/internal/repositories/token"
-	"taskem-server/internal/repositories/user"
 )
 
 type Opts struct {
 	fx.In
+	TokenRepo token.Repository
 	UserRepo  user.Repository
 	Config    config.Config
-	TokenRepo token.Repository
-	UserRepo user.Repository
-	Config   config.Config
-	Br       broker.Broker
+	Br        broker.Broker
 }
 
 type Auth struct {
-	userRepo user.Repository
-	config   config.Config
-	br       broker.Broker
+	userRepo  user.Repository
+	config    config.Config
+	br        broker.Broker
+	tokenRepo token.Repository
 }
 
 func New(opts Opts) *Auth {
 	return &Auth{
-		userRepo: opts.UserRepo,
-		config:   opts.Config,
-		br:       opts.Br,
+		br:        opts.Br,
 		userRepo:  opts.UserRepo,
 		config:    opts.Config,
 		tokenRepo: opts.TokenRepo,

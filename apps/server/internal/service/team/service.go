@@ -5,13 +5,10 @@ import (
 	"github.com/google/uuid"
 	"github.com/taskemapp/server/apps/server/internal/repositories/team"
 	"github.com/taskemapp/server/apps/server/internal/repositories/team_member"
+	"github.com/taskemapp/server/apps/server/internal/repositories/token"
 	"github.com/taskemapp/server/apps/server/internal/service"
 	"go.uber.org/fx"
 	"go.uber.org/zap"
-	"taskem-server/internal/repositories/team"
-	"taskem-server/internal/repositories/team_member"
-	"taskem-server/internal/repositories/token"
-	"taskem-server/internal/service"
 )
 
 type Opts struct {

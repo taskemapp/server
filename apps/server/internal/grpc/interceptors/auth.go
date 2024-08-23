@@ -6,10 +6,10 @@ import (
 	"github.com/go-faster/errors"
 	"github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/auth"
 	"github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/logging"
+	"github.com/taskemapp/server/apps/server/internal/pkg/jwt"
+	"github.com/taskemapp/server/apps/server/internal/repositories/token"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
-	"taskem-server/internal/pkg/jwt"
-	"taskem-server/internal/repositories/token"
 )
 
 type TokenKey struct{}

@@ -1,9 +1,9 @@
 package interceptors
 
 import (
+	"github.com/taskemapp/server/apps/server/internal/config"
+	"github.com/taskemapp/server/apps/server/internal/repositories/token"
 	"go.uber.org/fx"
-	"taskem-server/internal/config"
-	"taskem-server/internal/repositories/token"
 )
 
 type Opts struct {

@@ -20,7 +20,6 @@ type Config struct {
 
 	PostgresUrl string `envconfig:"POSTGRES_URL" required:"true"`
 	RedisURL    string `envconfig:"REDIS_URL" required:"true"`
-	RedisURL    string `envconfig:"REDIS_URL" required:"true" ignored:"true"`
 	RabbitMqUrl string `envconfig:"RABBITMQ_URL" required:"true"`
 
 	S3Host        string `envconfig:"S3_HOST"`

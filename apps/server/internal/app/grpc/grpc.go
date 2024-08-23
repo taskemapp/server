@@ -6,19 +6,16 @@ import (
 	authMd "github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/auth"
 	"github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/logging"
 	"github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/recovery"
+	"github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/selector"
 	"github.com/taskemapp/server/apps/server/internal/grpc/auth"
+	"github.com/taskemapp/server/apps/server/internal/grpc/interceptors"
 	"github.com/taskemapp/server/apps/server/internal/grpc/team"
 	v1 "github.com/taskemapp/server/apps/server/tools/gen/grpc/v1"
-	"github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/selector"
 	"go.uber.org/fx"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
-	"taskem-server/internal/grpc/auth"
-	"taskem-server/internal/grpc/interceptors"
-	"taskem-server/internal/grpc/team"
-	v1 "taskem-server/tools/gen/grpc/v1"
 )
 
 type Opts struct {

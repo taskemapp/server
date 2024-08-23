@@ -7,8 +7,9 @@ import (
 	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/pkg/errors"
 	"github.com/taskemapp/server/apps/server/internal/config"
-	"github.com/taskemapp/server/apps/server/internal/grpc"
+	"github.com/taskemapp/server/apps/server/internal/grpc/interceptors"
 	"github.com/taskemapp/server/apps/server/internal/mapper"
+	"github.com/taskemapp/server/apps/server/internal/repositories/token"
 	"github.com/taskemapp/server/apps/server/internal/service"
 	"github.com/taskemapp/server/apps/server/internal/service/team"
 	v1 "github.com/taskemapp/server/apps/server/tools/gen/grpc/v1"
@@ -17,13 +18,6 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/emptypb"
-	"taskem-server/internal/config"
-	"taskem-server/internal/grpc/interceptors"
-	"taskem-server/internal/mapper"
-	"taskem-server/internal/repositories/token"
-	"taskem-server/internal/service"
-	"taskem-server/internal/service/team"
-	v1 "taskem-server/tools/gen/grpc/v1"
 )
 
 type Opts struct {

@@ -15,20 +15,13 @@ import (
 	"github.com/taskemapp/server/apps/server/internal/app/team"
 	"github.com/taskemapp/server/apps/server/internal/broker"
 	"github.com/taskemapp/server/apps/server/internal/config"
+	"github.com/taskemapp/server/apps/server/internal/grpc/interceptors"
 	"go.uber.org/fx"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 	"net"
 	"net/url"
-	"os"
-	"path/filepath"
-	"taskem-server/internal/app/auth"
-	grpcsrv "taskem-server/internal/app/grpc"
-	"taskem-server/internal/app/task"
-	"taskem-server/internal/app/team"
-	"taskem-server/internal/config"
-	"taskem-server/internal/grpc/interceptors"
 )
 
 const (
@@ -41,6 +34,7 @@ var App = fx.Options(
 	fx.Provide(setupLogger),
 	fx.Provide(setupPgPool),
 	fx.Provide(setupRabbitMq),
+	fx.Provide(setupRedisClient),
 	fx.Provide(fx.Annotate(broker.New, fx.As(new(broker.Broker)))),
 
 	auth.App,

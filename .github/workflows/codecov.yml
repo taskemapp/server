@@ -16,9 +16,11 @@ jobs:
 
     strategy:
       matrix:
-        module:
-          - ./apps/notification
-          - ./apps/server
+        include:
+          - module: ./apps/server
+            name: server
+          - module: ./apps/notification
+            name: notification
 
     steps:
       - uses: actions/checkout@v4

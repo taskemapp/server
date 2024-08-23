@@ -4,6 +4,7 @@ services:
     restart: always
     ports:
       - "54321:5432"
+      - "54321:5432"
     environment:
       POSTGRES_USER: taskem
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
@@ -16,6 +17,21 @@ services:
       timeout: 5s
       retries: 5
 
+  redis:
+    image: redis
+    restart: always
+    ports:
+      - "63798:6379"
+    environment:
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
+    command: redis-server --requirepass ${REDIS_PASSWORD}
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: [ "CMD", "token-cli", "--raw", "incr", "ping" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
   smtp:
     image: ghcr.io/docker-mailserver/docker-mailserver:latest
     restart: unless-stopped
@@ -84,8 +100,7 @@ services:
       target: final
     depends_on:
       - db
-      - rabbitmq
-      - smtp
+      - redis
     ports:
       - "50051:50051"
 
@@ -101,3 +116,5 @@ services:
 
 volumes:
   db-data:
+  redis-data:
+    driver: local

@@ -2,6 +2,7 @@ package auth
 
 import (
 	"context"
+	"fmt"
 	"encoding/json"
 	"github.com/alexedwards/argon2id"
 	"github.com/taskemapp/server/apps/notification/pkg/notifier"
@@ -10,10 +11,17 @@ import (
 	"github.com/taskemapp/server/apps/server/internal/pkg/jwt"
 	"github.com/taskemapp/server/apps/server/internal/repositories/user"
 	"go.uber.org/fx"
+	"taskem-server/internal/config"
+	"taskem-server/internal/pkg/jwt"
+	"taskem-server/internal/repositories/token"
+	"taskem-server/internal/repositories/user"
 )
 
 type Opts struct {
 	fx.In
+	UserRepo  user.Repository
+	Config    config.Config
+	TokenRepo token.Repository
 	UserRepo user.Repository
 	Config   config.Config
 	Br       broker.Broker
@@ -30,6 +38,9 @@ func New(opts Opts) *Auth {
 		userRepo: opts.UserRepo,
 		config:   opts.Config,
 		br:       opts.Br,
+		userRepo:  opts.UserRepo,
+		config:    opts.Config,
+		tokenRepo: opts.TokenRepo,
 	}
 }
 
@@ -48,7 +59,7 @@ func (a *Auth) Login(ctx context.Context, opts LoginOpts) (resp *LoginResponse, 
 		return nil, ErrPwdMatch
 	}
 
-	token, err := jwt.NewToken(jwt.Opts{
+	access, err := jwt.NewToken(jwt.Opts{
 		ID:       u.ID,
 		Duration: a.config.TokenTtl,
 		Email:    u.Email,
@@ -66,6 +77,26 @@ func (a *Auth) Login(ctx context.Context, opts LoginOpts) (resp *LoginResponse, 
 
 	if err != nil {
 		return nil, ErrTokenGen
+	}
+
+	err = a.tokenRepo.SetToken(ctx, token.CreateOpts{
+		ID:        u.ID,
+		TokenType: "access",
+		Token:     access,
+		Duration:  a.config.TokenTtl,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	err = a.tokenRepo.SetToken(ctx, token.CreateOpts{
+		ID:        u.ID,
+		TokenType: "refresh",
+		Token:     refresh,
+		Duration:  a.config.RefreshTokenTtl,
+	})
+	if err != nil {
+		return nil, err
 	}
 
 	body, err := json.Marshal(notifier.Notification{
@@ -86,7 +117,7 @@ func (a *Auth) Login(ctx context.Context, opts LoginOpts) (resp *LoginResponse, 
 	}
 
 	return &LoginResponse{
-		Token:        token,
+		Token:        access,
 		RefreshToken: refresh,
 		TokenType:    "Bearer",
 	}, nil
@@ -109,4 +140,63 @@ func (a *Auth) Registration(ctx context.Context, opts RegistrationOpts) error {
 	}
 
 	return nil
+}
+
+func (a *Auth) RefreshToken(ctx context.Context, opts RefreshTokenOpts) (resp *LoginResponse, err error) {
+	_, err = a.tokenRepo.GetToken(ctx, fmt.Sprintf("%s:%s", jwt.Refresh, opts.UserID))
+	if err != nil {
+
+		return nil, err
+	}
+
+	u, err := a.userRepo.FindByID(ctx, opts.UserID)
+	if err != nil {
+		return nil, err
+	}
+
+	access, err := jwt.NewToken(jwt.Opts{
+		ID:       u.ID,
+		Duration: a.config.TokenTtl,
+		Email:    u.Email,
+		Secret:   a.config.TokenSecret,
+	})
+	if err != nil {
+		return nil, ErrTokenGen
+	}
+
+	refresh, err := jwt.NewToken(jwt.Opts{
+		ID:       u.ID,
+		Duration: a.config.RefreshTokenTtl,
+		Secret:   a.config.TokenSecret,
+	})
+
+	if err != nil {
+		return nil, ErrTokenGen
+	}
+
+	err = a.tokenRepo.SetToken(ctx, token.CreateOpts{
+		ID:        u.ID,
+		TokenType: "access",
+		Token:     access,
+		Duration:  a.config.TokenTtl,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	err = a.tokenRepo.SetToken(ctx, token.CreateOpts{
+		ID:        u.ID,
+		TokenType: "refresh",
+		Token:     refresh,
+		Duration:  a.config.RefreshTokenTtl,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return &LoginResponse{
+		Token:        access,
+		RefreshToken: refresh,
+		TokenType:    "Bearer",
+	}, nil
 }

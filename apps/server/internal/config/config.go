@@ -19,6 +19,7 @@ type Config struct {
 	TokenSecret     string        `envconfig:"TOKEN_SECRET" required:"true"`
 
 	PostgresUrl string `envconfig:"POSTGRES_URL" required:"true"`
+	RedisURL    string `envconfig:"REDIS_URL" required:"true"`
 	RedisURL    string `envconfig:"REDIS_URL" required:"true" ignored:"true"`
 	RabbitMqUrl string `envconfig:"RABBITMQ_URL" required:"true"`
 

@@ -1,15 +1,13 @@
 package app
 
 import (
-	"crypto/tls"
-	"github.com/jordan-wright/email"
 	amqp "github.com/rabbitmq/amqp091-go"
 	"github.com/taskemapp/server/apps/notification/internal/broker"
 	"github.com/taskemapp/server/apps/notification/internal/config"
 	"github.com/taskemapp/server/apps/notification/internal/notifier"
+	"github.com/wneessen/go-mail"
 	"go.uber.org/fx"
 	"go.uber.org/zap"
-	"net/smtp"
 )
 
 const (
@@ -24,17 +22,13 @@ var App = fx.Options(
 	fx.Provide(setupSmtp),
 
 	fx.Provide(broker.New),
-	fx.Provide(fx.Annotate(notifier.NewEmail, fx.As(new(notifier.Notifier)))),
+	fx.Provide(fx.Annotate(notifier.NewEmail, fx.As(new(notifier.EmailNotifier)))),
 
 	fx.Invoke(
-		func(logger *zap.Logger, c config.Config, mq *broker.Mq, e notifier.Notifier) {
+		func(logger *zap.Logger, c config.Config, mq *broker.Mq, e notifier.EmailNotifier) {
 			logger.Sugar().Info("Starting app: env - ", c.AppEnv)
 			go func() {
-				e.Send()
-			}()
-			go func() {
-
-				err := mq.Receive("email")
+				err := mq.Receive("notifications")
 				if err != nil {
 					logger.Fatal("Error starting app", zap.Error(err))
 				}
@@ -56,18 +50,10 @@ func setupRabbitMq(c config.Config) (*amqp.Connection, error) {
 	return amqp.Dial(c.RabbitMqUrl)
 }
 
-func setupSmtp(c config.Config) (*email.Pool, error) {
-	conf := &tls.Config{ServerName: c.SmtpHost}
-	return email.NewPool(
-		c.SmtpUrl,
-		10,
-		smtp.PlainAuth(
-			"",
-			c.SmtpUsername,
-			c.SmtpPassword,
-			c.SmtpHost,
-		),
-		conf,
+func setupSmtp(c config.Config) (*mail.Client, error) {
+	return mail.NewClient(c.SmtpHost,
+		mail.WithSMTPAuth(mail.SMTPAuthPlain), mail.WithTLSPortPolicy(mail.TLSMandatory),
+		mail.WithUsername(c.SmtpUsername), mail.WithPassword(c.SmtpPassword),
 	)
 }
 

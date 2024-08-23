@@ -1,57 +1,53 @@
 package notifier
 
 import (
-	"github.com/jordan-wright/email"
+	"github.com/wneessen/go-mail"
 	"go.uber.org/fx"
 	"go.uber.org/zap"
-	"sync"
-	"time"
 )
 
 type Opts struct {
 	fx.In
 	*zap.Logger
-	*email.Pool
+	*mail.Client
 }
 
 type Email struct {
 	log *zap.Logger
-	c   *email.Pool
-	wg  sync.WaitGroup
+	c   *mail.Client
 }
 
 func NewEmail(opts Opts) *Email {
 	return &Email{
 		log: opts.Logger,
-		c:   opts.Pool,
-		wg:  sync.WaitGroup{},
+		c:   opts.Client,
 	}
 }
 
-func (e *Email) Send() error {
+func (e *Email) Send(opts EmailOpts) error {
 	e.log.Info("Creating email")
-	msg := email.NewEmail()
 
-	msg.From = "Jordan Wright <kanada.smirnov@ya.ru>"
-	msg.To = []string{"kanada.smirnov@gmail.com"}
+	m := mail.NewMsg()
+	if err := m.From(opts.From); err != nil {
+		e.log.Sugar().Errorf("Failed to create email: %s", err)
+		return err
+	}
+	if err := m.To(opts.To...); err != nil {
+		e.log.Sugar().Errorf("Failed to create email: %s", err)
+		return err
+	}
 
-	msg.Subject = "Awesome Subject"
-	msg.Text = []byte("Text Body is, of course, supported!")
-	msg.HTML = []byte("<h1>Fancy HTML is supported, too!</h1>")
+	m.Subject(opts.Subject)
+	m.SetBodyString(mail.TypeTextHTML, "Do you like this mail? I certainly do!")
 
 	e.log.Info("Sending email")
-	e.wg.Add(1)
-	go func() {
-		defer e.c.Close()
 
-		err := e.c.Send(msg, 5*time.Second)
-		if err != nil {
-			e.log.Sugar().Error("Failed sending email: ", err)
-		}
+	err := e.c.DialAndSend(m)
+	if err != nil {
+		e.log.Sugar().Errorf("Failed to send email: %s", err)
+	}
 
-		e.wg.Done()
-		e.log.Info("Email sent")
-	}()
+	e.log.Info("Email sent")
 
 	return nil
 }

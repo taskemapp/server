@@ -46,6 +46,7 @@ func (m *Mq) Receive(queueName string) error {
 		nil,
 	)
 	if err != nil {
+		m.log.Sugar().Errorf("Failed to declare a queue: %s", err)
 		return err
 	}
 

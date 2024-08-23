@@ -4,9 +4,9 @@ go 1.23.0
 
 require (
 	github.com/joho/godotenv v1.5.1
-	github.com/jordan-wright/email v4.0.1-0.20210109023952-943e75fe5223+incompatible
 	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/rabbitmq/amqp091-go v1.10.0
+	github.com/wneessen/go-mail v0.4.3
 	go.uber.org/fx v1.22.2
 	go.uber.org/zap v1.27.0
 )

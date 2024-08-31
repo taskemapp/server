@@ -1,4 +1,4 @@
-package broker
+package queue
 
 type ConsumeFn func(<-chan Message) error
 

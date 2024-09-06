@@ -6,7 +6,7 @@ import (
 	"go.uber.org/zap"
 )
 
-type Opts struct {
+type EmailOpts struct {
 	fx.In
 	*zap.Logger
 	*mail.Client
@@ -17,15 +17,15 @@ type Email struct {
 	c   *mail.Client
 }
 
-func NewEmail(opts Opts) *Email {
+func NewEmail(opts EmailOpts) *Email {
 	return &Email{
 		log: opts.Logger,
 		c:   opts.Client,
 	}
 }
 
-func (e *Email) Send(opts EmailOpts) error {
-	e.log.Info("Creating email")
+func (e *Email) Send(opts EmailMsg) error {
+	e.log.Debug("Creating email")
 
 	m := mail.NewMsg()
 	if err := m.From(opts.From); err != nil {
@@ -38,16 +38,17 @@ func (e *Email) Send(opts EmailOpts) error {
 	}
 
 	m.Subject(opts.Subject)
-	m.SetBodyString(mail.TypeTextHTML, "Do you like this mail? I certainly do!")
+	m.SetBodyString(mail.TypeTextHTML, opts.Body)
 
-	e.log.Info("Sending email")
+	e.log.Debug("Sending email")
 
 	err := e.c.DialAndSend(m)
 	if err != nil {
 		e.log.Sugar().Errorf("Failed to send email: %s", err)
+		return err
 	}
 
-	e.log.Info("Email sent")
+	e.log.Sugar().Infof("Email sent to: %s", opts.To)
 
 	return nil
 }

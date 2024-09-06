@@ -13,9 +13,9 @@ import (
 	grpcsrv "github.com/taskemapp/server/apps/server/internal/app/grpc"
 	"github.com/taskemapp/server/apps/server/internal/app/task"
 	"github.com/taskemapp/server/apps/server/internal/app/team"
-	"github.com/taskemapp/server/apps/server/internal/broker"
 	"github.com/taskemapp/server/apps/server/internal/config"
 	"github.com/taskemapp/server/apps/server/internal/grpc/interceptors"
+	"github.com/taskemapp/server/libs/queue"
 	"go.uber.org/fx"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
@@ -35,12 +35,15 @@ var App = fx.Options(
 	fx.Provide(setupPgPool),
 	fx.Provide(setupRabbitMq),
 	fx.Provide(setupRedisClient),
-	fx.Provide(fx.Annotate(broker.New, fx.As(new(broker.Broker)))),
 
+	//RabbitMq
+	fx.Provide(queue.NewConfig),
+	fx.Provide(fx.Annotate(queue.NewMQ, fx.As(new(queue.Queue)))),
+
+	//General app
 	auth.App,
 	team.App,
 	task.App,
-
 	fx.Provide(interceptors.New),
 	fx.Provide(grpcsrv.New),
 
@@ -130,7 +133,7 @@ func setupPgPool(c config.Config) (*pgxpool.Pool, error) {
 }
 
 func setupRabbitMq(c config.Config) (*amqp.Connection, error) {
-	return amqp.Dial(c.RabbitMqUrl)
+	return amqp.Dial(c.RabbitMq.Url)
 }
 
 func setupRedisClient(c config.Config) (*redis.Client, error) {

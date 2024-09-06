@@ -1,6 +1,6 @@
 package queue
 
-type ConsumeFn func(<-chan Message) error
+type ConsumeFn func(msg Message)
 
 type Queue interface {
 	Publish(queue string, message Message) error

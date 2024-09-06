@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/pkg/errors"
 	amqp "github.com/rabbitmq/amqp091-go"
+	"sync"
 	"time"
 )
 
@@ -37,7 +38,7 @@ func (r *RabbitMQ) Consume(name string, handler ConsumeFn) error {
 
 	consumer, err := ch.Consume(
 		q.Name,
-		"notifi",
+		"notification service",
 		true,
 		false,
 		false,
@@ -48,20 +49,21 @@ func (r *RabbitMQ) Consume(name string, handler ConsumeFn) error {
 	if err != nil {
 		return errors.Wrap(err, "Failed to consume")
 	}
-
-	out := make(chan Message)
+	wg := sync.WaitGroup{}
+	wg.Add(1)
 	go func() {
-		defer close(out)
+		defer wg.Done()
 		for msg := range consumer {
-			println("cast msg: ", msg.Body)
-			out <- Message{
+			handler(Message{
 				ContentType: msg.ContentType,
 				Body:        msg.Body,
-			}
+			})
 		}
 	}()
 
-	return handler(out)
+	wg.Wait()
+
+	return nil
 }
 
 func (r *RabbitMQ) Close() error {

@@ -3,6 +3,7 @@ package config
 import (
 	"github.com/joho/godotenv"
 	"github.com/kelseyhightower/envconfig"
+	"github.com/taskemapp/server/libs/queue"
 	"os"
 	"path/filepath"
 	"time"
@@ -20,7 +21,8 @@ type Config struct {
 
 	PostgresUrl string `envconfig:"POSTGRES_URL" required:"true"`
 	RedisURL    string `envconfig:"REDIS_URL" required:"true"`
-	RabbitMqUrl string `envconfig:"RABBITMQ_URL" required:"true"`
+
+	RabbitMq queue.Config
 
 	S3Host        string `envconfig:"S3_HOST"`
 	S3AccessToken string `envconfig:"S3_ACCESS_TOKEN"`
@@ -44,6 +46,13 @@ func New() (Config, error) {
 	if err := envconfig.Process("", &cfg); err != nil {
 		return cfg, err
 	}
+
+	mqConfig, err := queue.NewConfig()
+	if err != nil {
+		panic(err)
+	}
+
+	cfg.RabbitMq = mqConfig
 
 	return cfg, nil
 }

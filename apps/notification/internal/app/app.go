@@ -1,10 +1,12 @@
 package app
 
 import (
+	"encoding/json"
 	amqp "github.com/rabbitmq/amqp091-go"
-	"github.com/taskemapp/server/apps/notification/internal/broker"
 	"github.com/taskemapp/server/apps/notification/internal/config"
 	"github.com/taskemapp/server/apps/notification/internal/notifier"
+	notify "github.com/taskemapp/server/apps/notification/pkg/notifier"
+	"github.com/taskemapp/server/libs/queue"
 	"github.com/wneessen/go-mail"
 	"go.uber.org/fx"
 	"go.uber.org/zap"
@@ -21,16 +23,40 @@ var App = fx.Options(
 	fx.Provide(setupRabbitMq),
 	fx.Provide(setupSmtp),
 
-	fx.Provide(broker.New),
+	fx.Provide(queue.NewConfig),
+	fx.Provide(fx.Annotate(queue.NewMQ, fx.As(new(queue.Queue)))),
 	fx.Provide(fx.Annotate(notifier.NewEmail, fx.As(new(notifier.EmailNotifier)))),
 
 	fx.Invoke(
-		func(logger *zap.Logger, c config.Config, mq *broker.Mq, e notifier.EmailNotifier) {
+		func(logger *zap.Logger, c config.Config, mq queue.Queue, e notifier.EmailNotifier) {
 			logger.Sugar().Info("Starting app: env - ", c.AppEnv)
 			go func() {
-				err := mq.Receive(broker.NotificationChannel)
+				err := mq.Consume(
+					notify.ChannelEmail,
+					func(msg queue.Message) {
+						var n notify.EmailNotification
+						err := json.Unmarshal(msg.Body, &n)
+						if err != nil {
+							logger.Sugar().Errorf("Error unmarshalling email notification: %s", err)
+						}
+
+						logger.Sugar().Infof("Recieved message: %s", msg.Body)
+						_ = notifier.EmailMsg{
+							From:    n.From,
+							To:      []string{n.To},
+							Subject: n.Title,
+							Body:    n.Notification.Message,
+						}
+
+						//err = e.Send(email)
+						if err != nil {
+							logger.Sugar().Errorf("Error sending email: %s", err)
+						}
+					},
+				)
+
 				if err != nil {
-					logger.Fatal("Error starting app", zap.Error(err))
+					logger.Sugar().Errorf("Error consuming messages: %s", err)
 				}
 			}()
 		},
@@ -47,7 +73,7 @@ func setupConfig() (config.Config, error) {
 }
 
 func setupRabbitMq(c config.Config) (*amqp.Connection, error) {
-	return amqp.Dial(c.RabbitMqUrl)
+	return amqp.Dial(c.RabbitMq.Url)
 }
 
 func setupSmtp(c config.Config) (*mail.Client, error) {

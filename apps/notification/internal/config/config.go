@@ -3,6 +3,7 @@ package config
 import (
 	"github.com/joho/godotenv"
 	"github.com/kelseyhightower/envconfig"
+	"github.com/taskemapp/server/libs/queue"
 	"os"
 	"path/filepath"
 )
@@ -10,7 +11,7 @@ import (
 type Config struct {
 	AppEnv string `envconfig:"APP_ENV" default:"dev"`
 
-	RabbitMqUrl string `envconfig:"RABBITMQ_URL" required:"true"`
+	RabbitMq queue.Config
 
 	SmtpUrl      string `envconfig:"SMTP_URL" required:"true"`
 	SmtpHost     string `envconfig:"SMTP_HOST" required:"true"`
@@ -34,6 +35,13 @@ func New() (Config, error) {
 	if err := envconfig.Process("", &cfg); err != nil {
 		return cfg, err
 	}
+
+	mqConfig, err := queue.NewConfig()
+	if err != nil {
+		panic(err)
+	}
+
+	cfg.RabbitMq = mqConfig
 
 	return cfg, nil
 }

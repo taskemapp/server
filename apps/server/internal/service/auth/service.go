@@ -6,11 +6,11 @@ import (
 	"fmt"
 	"github.com/alexedwards/argon2id"
 	"github.com/taskemapp/server/apps/notification/pkg/notifier"
-	"github.com/taskemapp/server/apps/server/internal/broker"
 	"github.com/taskemapp/server/apps/server/internal/config"
 	"github.com/taskemapp/server/apps/server/internal/pkg/jwt"
 	"github.com/taskemapp/server/apps/server/internal/repositories/token"
 	"github.com/taskemapp/server/apps/server/internal/repositories/user"
+	"github.com/taskemapp/server/libs/queue"
 	"go.uber.org/fx"
 )
 
@@ -19,13 +19,13 @@ type Opts struct {
 	TokenRepo token.Repository
 	UserRepo  user.Repository
 	Config    config.Config
-	Br        broker.Broker
+	Br        queue.Queue
 }
 
 type Auth struct {
 	userRepo  user.Repository
 	config    config.Config
-	br        broker.Broker
+	br        queue.Queue
 	tokenRepo token.Repository
 }
 
@@ -93,19 +93,19 @@ func (a *Auth) Login(ctx context.Context, opts LoginOpts) (resp *LoginResponse, 
 		return nil, err
 	}
 
-	body, err := json.Marshal(notifier.Notification{
-		Type:      notifier.EmailNotify,
-		Recipient: opts.Email,
-		Subject:   "OTP",
-		Message:   "otp",
+	body, err := json.Marshal(notifier.EmailNotification{
+		Notification: notifier.Notification{},
+		To:           opts.Email,
+		From:         "no-replay@taskem.test",
 	})
 	if err != nil {
 		return nil, err
 	}
-	err = a.br.Send(broker.SendOpts{
-		Body: body,
-	}, broker.NotificationChannel)
 
+	err = a.br.Publish(notifier.ChannelEmail, queue.Message{
+		ContentType: "application/json",
+		Body:        body,
+	})
 	if err != nil {
 		return nil, err
 	}

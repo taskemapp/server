@@ -1,23 +1,27 @@
 package notifier
 
 type EmailNotifier interface {
-	Send(opts EmailOpts) error
+	Send(msg EmailMsg) error
 }
 
-type EmailOpts struct {
-	From    string
-	To      []string
-	Subject string
-	Body    []byte
-}
-
-type PushNotifier interface {
-	Send(opts PushOpts) error
-}
-
-type PushOpts struct {
+type EmailMsg struct {
 	From    string
 	To      []string
 	Subject string
 	Body    string
+}
+
+type PushNotifier interface {
+	Send(msg PushMsg) error
+}
+
+type PushMsg struct {
+	From     string
+	To       []string
+	Title    string
+	Topic    string
+	Subtitle string
+	Body     string
+	Image    string
+	Priority int
 }

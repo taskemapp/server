@@ -17,13 +17,13 @@ jobs:
     strategy:
       matrix:
         include:
-          - module: ./apps/server
+          - module: apps/server
             name: server
-          - module: ./apps/notification
+          - module: apps/notification
             name: notification
-          - module: ./libs/queue
+          - module: libs/queue
             name: queue
-          - module: ./libs/template
+          - module: libs/template
             name: template
 
     steps:

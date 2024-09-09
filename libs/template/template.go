@@ -23,9 +23,29 @@ type VerifyEmail struct {
 	UnsubscribeLink  string
 }
 
-func Get(t Template) (*template.Template, error) {
+type option struct {
+	dir string
+}
+
+type OptionFn func(*option)
+
+func WithDir(dir string) OptionFn {
+	return func(o *option) {
+		o.dir = dir
+	}
+}
+
+func Get(t Template, opts ...OptionFn) (*template.Template, error) {
 	wd, err := os.Getwd()
-	path := filepath.Join(wd, "templates")
+	defaultOpt := option{dir: wd}
+	for _, opt := range opts {
+		if opt == nil {
+			continue
+		}
+		opt(&defaultOpt)
+	}
+
+	path := filepath.Join(defaultOpt.dir, "templates")
 	if err != nil {
 		return nil, err
 	}

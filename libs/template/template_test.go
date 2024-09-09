@@ -17,7 +17,7 @@ func TestGet(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		_, err := Get(tt.temp)
+		_, err := Get(tt.temp, WithDir("../.."))
 		assert.NoError(t, err)
 	}
 }

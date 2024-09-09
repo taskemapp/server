@@ -1,6 +1,7 @@
 package auth
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -11,6 +12,7 @@ import (
 	"github.com/taskemapp/server/apps/server/internal/repositories/token"
 	"github.com/taskemapp/server/apps/server/internal/repositories/user"
 	"github.com/taskemapp/server/libs/queue"
+	"github.com/taskemapp/server/libs/template"
 	"go.uber.org/fx"
 )
 
@@ -93,23 +95,6 @@ func (a *Auth) Login(ctx context.Context, opts LoginOpts) (resp *LoginResponse, 
 		return nil, err
 	}
 
-	body, err := json.Marshal(notifier.EmailNotification{
-		Notification: notifier.Notification{},
-		To:           opts.Email,
-		From:         "no-replay@taskem.test",
-	})
-	if err != nil {
-		return nil, err
-	}
-
-	err = a.br.Publish(notifier.ChannelEmail, queue.Message{
-		ContentType: "application/json",
-		Body:        body,
-	})
-	if err != nil {
-		return nil, err
-	}
-
 	return &LoginResponse{
 		Token:        access,
 		RefreshToken: refresh,
@@ -128,6 +113,41 @@ func (a *Auth) Registration(ctx context.Context, opts RegistrationOpts) error {
 		Name:        opts.Name,
 		Password:    passwd,
 		DisplayName: opts.Name,
+	})
+	if err != nil {
+		return err
+	}
+
+	temp, err := template.Get(template.VerifyEmailTemplate)
+	if err != nil {
+		return err
+	}
+
+	var buff bytes.Buffer
+	err = temp.Execute(&buff, template.VerifyEmail{
+		Name:             opts.Name,
+		ConfirmationLink: "conf-link",
+		UnsubscribeLink:  "unsubscribe-link",
+	})
+	if err != nil {
+		return err
+	}
+
+	body, err := json.Marshal(notifier.EmailNotification{
+		Notification: notifier.Notification{
+			Title:   "Verify email",
+			Message: buff.String(),
+		},
+		To:   opts.Email,
+		From: "no-replay@taskem.test",
+	})
+	if err != nil {
+		return err
+	}
+
+	err = a.br.Publish(notifier.ChannelEmail, queue.Message{
+		ContentType: "application/json",
+		Body:        body,
 	})
 	if err != nil {
 		return err

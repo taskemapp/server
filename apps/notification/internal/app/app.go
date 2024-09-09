@@ -41,14 +41,16 @@ var App = fx.Options(
 						}
 
 						logger.Sugar().Infof("Recieved message: %s", msg.Body)
-						_ = notifier.EmailMsg{
-							From:    n.From,
+						// TODO: temporary use a smtp user, because didn't have deployed smtp server
+						// later need to change to a `n.From`
+						email := notifier.EmailMsg{
+							From:    c.SmtpUsername,
 							To:      []string{n.To},
 							Subject: n.Title,
-							Body:    n.Notification.Message,
+							Body:    n.Message,
 						}
 
-						//err = e.Send(email)
+						err = e.Send(email)
 						if err != nil {
 							logger.Sugar().Errorf("Error sending email: %s", err)
 						}

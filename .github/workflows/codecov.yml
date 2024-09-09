@@ -36,7 +36,6 @@ jobs:
           go-version: '1.23'
 
       - name: Run coverage
-        working-directory: ./
         run: go test -race -coverprofile=coverage.out -covermode=atomic ./${{ matrix.module }}
 
       - name: Upload coverage reports to Codecov

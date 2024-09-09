@@ -36,9 +36,8 @@ jobs:
           go-version: '1.23'
 
       - name: Run coverage
-        working-directory: ${{ matrix.name == 'template' && '.' || matrix.module }}
-        run: |
-          go test -race -coverprofile=coverage.out -covermode=atomic ./...
+        working-directory: ./
+        run: go test -race -coverprofile=coverage.out -covermode=atomic ./${{ matrix.module }}
 
       - name: Upload coverage reports to Codecov
         uses: codecov/codecov-action@v4

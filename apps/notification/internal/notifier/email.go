@@ -38,6 +38,7 @@ func (e *Email) Send(opts EmailMsg) error {
 	}
 
 	m.Subject(opts.Subject)
+
 	m.SetBodyString(mail.TypeTextHTML, opts.Body)
 
 	e.log.Debug("Sending email")

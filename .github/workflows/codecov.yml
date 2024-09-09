@@ -23,7 +23,7 @@ jobs:
             name: notification
           - module: ./libs/queue
             name: queue
-          - module: ./apps/template
+          - module: ./libs/template
             name: template
 
     steps:

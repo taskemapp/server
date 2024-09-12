@@ -7,6 +7,7 @@ import (
 	"github.com/taskemapp/server/apps/server/internal/repositories/user"
 	"github.com/taskemapp/server/libs/queue"
 	"github.com/taskemapp/server/libs/template"
+	"go.uber.org/fx"
 	"go.uber.org/multierr"
 	"strings"
 )
@@ -17,8 +18,23 @@ type AccountNotifier interface {
 
 type EmailAccountNotifier struct {
 	config   config.Config
-	br       queue.Queue
+	q        queue.Queue
 	userRepo user.Repository
+}
+
+type OptsEmailAccNotifier struct {
+	fx.In
+	Config   config.Config
+	Queue    queue.Queue
+	UserRepo user.Repository
+}
+
+func NewEmailAccountNotifier(opts OptsEmailAccNotifier) *EmailAccountNotifier {
+	return &EmailAccountNotifier{
+		config:   opts.Config,
+		q:        opts.Queue,
+		userRepo: opts.UserRepo,
+	}
 }
 
 func (n *EmailAccountNotifier) VerifyEmail(username string, email string) error {
@@ -44,7 +60,7 @@ func (n *EmailAccountNotifier) VerifyEmail(username string, email string) error 
 			ConfirmationLink: confirmLink,
 			UnsubscribeLink:  "unsubscribe-link",
 		},
-		q:     n.br,
+		q:     n.q,
 		title: "Verify to",
 		to:    email,
 		from:  n.config.NoReplayEmail,

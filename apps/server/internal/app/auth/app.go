@@ -2,6 +2,7 @@ package auth
 
 import (
 	authserver "github.com/taskemapp/server/apps/server/internal/grpc/auth"
+	"github.com/taskemapp/server/apps/server/internal/pkg/notifier"
 	"github.com/taskemapp/server/apps/server/internal/repositories/token"
 	"github.com/taskemapp/server/apps/server/internal/repositories/user"
 	authservice "github.com/taskemapp/server/apps/server/internal/service/auth"
@@ -15,6 +16,10 @@ var App = fx.Options(
 
 	fx.Provide(
 		fx.Annotate(token.NewClient, fx.As(new(token.Repository))),
+	),
+
+	fx.Provide(
+		fx.Annotate(notifier.NewEmailAccountNotifier, fx.As(new(notifier.AccountNotifier))),
 	),
 
 	fx.Provide(

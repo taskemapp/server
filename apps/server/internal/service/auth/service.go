@@ -1,42 +1,38 @@
 package auth
 
 import (
-	"bytes"
 	"context"
-	"encoding/json"
 	"fmt"
 	"github.com/alexedwards/argon2id"
-	"github.com/taskemapp/server/apps/notification/pkg/notifier"
 	"github.com/taskemapp/server/apps/server/internal/config"
 	"github.com/taskemapp/server/apps/server/internal/pkg/jwt"
+	"github.com/taskemapp/server/apps/server/internal/pkg/notifier"
 	"github.com/taskemapp/server/apps/server/internal/repositories/token"
 	"github.com/taskemapp/server/apps/server/internal/repositories/user"
-	"github.com/taskemapp/server/libs/queue"
-	"github.com/taskemapp/server/libs/template"
 	"go.uber.org/fx"
 )
 
 type Opts struct {
 	fx.In
-	TokenRepo token.Repository
-	UserRepo  user.Repository
-	Config    config.Config
-	Br        queue.Queue
+	TokenRepo   token.Repository
+	UserRepo    user.Repository
+	Config      config.Config
+	AccNotifier notifier.AccountNotifier
 }
 
 type Auth struct {
-	userRepo  user.Repository
-	config    config.Config
-	br        queue.Queue
-	tokenRepo token.Repository
+	userRepo    user.Repository
+	config      config.Config
+	tokenRepo   token.Repository
+	accNotifier notifier.AccountNotifier
 }
 
 func New(opts Opts) *Auth {
 	return &Auth{
-		br:        opts.Br,
-		userRepo:  opts.UserRepo,
-		config:    opts.Config,
-		tokenRepo: opts.TokenRepo,
+		userRepo:    opts.UserRepo,
+		config:      opts.Config,
+		tokenRepo:   opts.TokenRepo,
+		accNotifier: opts.AccNotifier,
 	}
 }
 
@@ -118,37 +114,7 @@ func (a *Auth) Registration(ctx context.Context, opts RegistrationOpts) error {
 		return err
 	}
 
-	temp, err := template.Get(template.VerifyEmailTemplate)
-	if err != nil {
-		return err
-	}
-
-	var buff bytes.Buffer
-	err = temp.Execute(&buff, template.VerifyEmail{
-		Name:             opts.Name,
-		ConfirmationLink: "conf-link",
-		UnsubscribeLink:  "unsubscribe-link",
-	})
-	if err != nil {
-		return err
-	}
-
-	body, err := json.Marshal(notifier.EmailNotification{
-		Notification: notifier.Notification{
-			Title:   "Verify email",
-			Message: buff.String(),
-		},
-		To:   opts.Email,
-		From: "no-replay@taskem.test",
-	})
-	if err != nil {
-		return err
-	}
-
-	err = a.br.Publish(notifier.ChannelEmail, queue.Message{
-		ContentType: "application/json",
-		Body:        body,
-	})
+	err = a.accNotifier.VerifyEmail(opts.Name, opts.Email)
 	if err != nil {
 		return err
 	}

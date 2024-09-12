@@ -21,6 +21,8 @@ jobs:
             name: server
           - module: ./apps/notification
             name: notification
+          - module: ./libs/queue
+            name: queue
 
     steps:
       - uses: actions/checkout@v4

@@ -24,6 +24,10 @@ type Config struct {
 
 	RabbitMq queue.Config
 
+	NoReplayEmail string `envconfig:"NO_REPLAY_EMAIL"`
+
+	HostDomain string `envconfig:"HOST_DOMAIN"`
+
 	S3Host        string `envconfig:"S3_HOST"`
 	S3AccessToken string `envconfig:"S3_ACCESS_TOKEN"`
 	S3SecretToken string `envconfig:"S3_SECRET_TOKEN"`

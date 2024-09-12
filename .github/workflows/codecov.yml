@@ -23,6 +23,8 @@ jobs:
             name: notification
           - module: ./libs/queue
             name: queue
+          - module: ./libs/template
+            name: template
 
     steps:
       - uses: actions/checkout@v4

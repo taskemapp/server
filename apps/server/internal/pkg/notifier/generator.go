@@ -31,7 +31,7 @@ func (b *BasicGenerator) VerifyLink() (string, uuid.UUID, error) {
 	_, err = sb.WriteString("/verify?id=")
 	err = multierr.Append(err, err)
 
-	_, err = sb.WriteString(b.HostDomain)
+	_, err = sb.WriteString(confirmID.String())
 	err = multierr.Append(err, err)
 
 	return sb.String(), confirmID, err
@@ -51,7 +51,7 @@ func (b *BasicGenerator) UnsubLink() (string, uuid.UUID, error) {
 	_, err = sb.WriteString("/unsub?id=")
 	err = multierr.Append(err, err)
 
-	_, err = sb.WriteString(b.HostDomain)
+	_, err = sb.WriteString(unsubID.String())
 	err = multierr.Append(err, err)
 
 	return sb.String(), unsubID, err

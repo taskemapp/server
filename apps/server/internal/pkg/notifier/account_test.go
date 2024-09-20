@@ -19,11 +19,11 @@ type testGenerator struct {
 }
 
 func (t *testGenerator) VerifyLink() (link string, id uuid.UUID, err error) {
-	return fmt.Sprintf("%s/verify/id=%s", t.cfg.HostDomain, uuid.Nil), uuid.Nil, nil
+	return fmt.Sprintf("%s/verify?id=%s", t.cfg.HostDomain, uuid.Nil), uuid.Nil, nil
 }
 
 func (t *testGenerator) UnsubLink() (link string, id uuid.UUID, err error) {
-	return fmt.Sprintf("%s/unsub/id=%s", t.cfg.HostDomain, uuid.Nil), uuid.Nil, nil
+	return fmt.Sprintf("%s/unsub?id=%s", t.cfg.HostDomain, uuid.Nil), uuid.Nil, nil
 }
 
 type args struct {

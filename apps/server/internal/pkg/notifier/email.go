@@ -12,13 +12,12 @@ import (
 type sendEmailOpts struct {
 	temp  *template.Template
 	data  any
-	q     queue.Queue
 	title string
 	to    string
 	from  string
 }
 
-func sendEmail(opts sendEmailOpts) error {
+func (n *EmailAccountNotifier) sendEmail(opts sendEmailOpts) error {
 	var buff bytes.Buffer
 	err := opts.temp.Execute(&buff, opts.data)
 	if err != nil {
@@ -27,7 +26,7 @@ func sendEmail(opts sendEmailOpts) error {
 
 	body, err := json.Marshal(notifier.EmailNotification{
 		Notification: notifier.Notification{
-			Title:   "Verify email",
+			Title:   opts.title,
 			Message: buff.String(),
 		},
 		To:   opts.to,
@@ -37,10 +36,12 @@ func sendEmail(opts sendEmailOpts) error {
 		return errors.Wrap(err, "send email")
 	}
 
-	err = opts.q.Publish(notifier.ChannelEmail, queue.Message{
+	msg := queue.Message{
 		ContentType: "application/json",
 		Body:        body,
-	})
+	}
+
+	err = n.q.Publish(notifier.ChannelEmail, msg)
 	if err != nil {
 		return errors.Wrap(err, "send email")
 	}

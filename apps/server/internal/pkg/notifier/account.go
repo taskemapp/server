@@ -34,7 +34,6 @@ func NewEmailAccountNotifier(opts OptsEmailAccNotifier) *EmailAccountNotifier {
 }
 
 func (n *EmailAccountNotifier) VerifyEmail(username string, email string) error {
-
 	confirmLink, _, err := n.lg.VerifyLink()
 	if err != nil {
 		return errors.Wrap(err, "verify email")

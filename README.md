@@ -3,4 +3,4 @@
 
 # Server for `taskem`
 
-![codecov graph](https://codecov.io/gh/taskemapp/taskem-server/graphs/sunburst.svg?token=13F6QIQ717)
+[![codecov graph](https://codecov.io/gh/taskemapp/taskem-server/graphs/sunburst.svg?token=13F6QIQ717)](https://codecov.io/gh/taskemapp/server/graphs/sunburst.svg?token=13F6QIQ717)

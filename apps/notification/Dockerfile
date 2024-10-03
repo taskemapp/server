@@ -12,6 +12,8 @@ ARG GO_VERSION=1.23.0
 FROM --platform=$BUILDPLATFORM golang:${GO_VERSION} AS build
 WORKDIR /src
 
+ARG PROJECT_PATH=apps/notification
+
 LABEL org.opencontainers.image.source="https://github.com/taskemapp/notification"
 
 # Download dependencies as a separate step to take advantage of Docker's caching.

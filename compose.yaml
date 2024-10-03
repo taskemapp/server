@@ -108,9 +108,10 @@ services:
       - "50051:50051"
 
   notification:
-    env_file: ".env"
+    env_file: .env
     build:
-      context: ./apps/server/
+      context: .
+      dockerfile: apps/notification/Dockerfile
       target: final
     depends_on:
       - db

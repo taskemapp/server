@@ -101,10 +101,10 @@ github.com/stretchr/testify v1.3.0/go.mod h1:M5WIy9Dh21IEIfnGCwXGc5bZfKNJtfHm1UV
 github.com/stretchr/testify v1.7.0/go.mod h1:6Fq8oRcR53rry900zMqJjRRixrwX3KX962/h/Wwjteg=
 github.com/stretchr/testify v1.9.0 h1:HtqpIVDClZ4nwg75+f6Lvsy/wHu+3BoSGCbBAcpTsTg=
 github.com/stretchr/testify v1.9.0/go.mod h1:r2ic/lqez/lEtzL7wO/rwa5dbSLXVDPFyf8C91i36aY=
-github.com/taskemapp/server/apps/notification v0.0.0-20240823134806-8d5115da9e2c h1:L4DI7XVHfb2xj4PgxT3d//Lc5g1o/nfsE7dthXRm1cQ=
-github.com/taskemapp/server/apps/notification v0.0.0-20240823134806-8d5115da9e2c/go.mod h1:bWtPKaT7sO840/AcRDyMcCBhWXUGqlsOcBdh+7TLxqI=
-github.com/taskemapp/server/libs/queue v0.0.0-20240831183951-3fedede642c3 h1:HN5SgxFwgMPb0nB/lSPnDPADRNkytR0S5MymoN0vWOU=
-github.com/taskemapp/server/libs/queue v0.0.0-20240831183951-3fedede642c3/go.mod h1:nwYETy6ruFQx4XwfJr7K1cQ3hnf1oEgpP4ds7KJqaxE=
+github.com/taskemapp/server/apps/notification v0.0.0-20240920224238-1123d7cd13f6 h1:1W8X3MvcpRiBV1Wj2gBqe5HtomjQHHvVsn4WQ+N09N0=
+github.com/taskemapp/server/apps/notification v0.0.0-20240920224238-1123d7cd13f6/go.mod h1:ZbvCuDqNFM8pgNFYsJG5b7QfSNOrqg4SWd/IO814Ttc=
+github.com/taskemapp/server/libs/queue v0.0.0-20240906120508-8de35b503387 h1:SMkXkBnYpmTujOTycchi4jpfsgqKDhBLuA0es8/ICRs=
+github.com/taskemapp/server/libs/queue v0.0.0-20240906120508-8de35b503387/go.mod h1:nwYETy6ruFQx4XwfJr7K1cQ3hnf1oEgpP4ds7KJqaxE=
 github.com/taskemapp/server/libs/template v0.0.0-20240912173021-e7f2908c811b h1:vYfuwHvrq+OabVziP87hQTOc+ta5xasi6yOxFaIbT04=
 github.com/taskemapp/server/libs/template v0.0.0-20240912173021-e7f2908c811b/go.mod h1:c0QW0dsaeGAHACHELm5FruaoWCHZ5FYGvo67xx+J1+U=
 github.com/yuin/goldmark v1.4.13/go.mod h1:6yULJ656Px+3vBD8DxQVa3kxgyrAnzto9xy5taEt/CY=

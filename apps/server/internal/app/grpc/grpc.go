@@ -3,10 +3,13 @@ package grpc
 import (
 	"context"
 	"fmt"
+	"net"
+
 	authMd "github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/auth"
 	"github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/logging"
 	"github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/recovery"
 	"github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/selector"
+	"github.com/taskemapp/server/apps/server/internal/config"
 	"github.com/taskemapp/server/apps/server/internal/grpc/auth"
 	"github.com/taskemapp/server/apps/server/internal/grpc/interceptors"
 	"github.com/taskemapp/server/apps/server/internal/grpc/team"
@@ -15,6 +18,7 @@ import (
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/reflection"
 	"google.golang.org/grpc/status"
 )
 
@@ -63,6 +67,39 @@ func New(opts Opts) App {
 	v1.RegisterTeamServer(srv, opts.TeamServer)
 
 	return App{Srv: srv}
+}
+
+func Invoke(lc fx.Lifecycle, log *zap.Logger, c config.Config, srv *grpc.Server) {
+	lc.Append(
+		fx.Hook{
+			OnStart: func(ctx context.Context) error {
+				log.Sugar().Infof("Server starting on port %d", c.GrpcPort)
+
+				l, err := net.Listen("tcp", fmt.Sprintf(":%d", c.GrpcPort))
+				if err != nil {
+					return err
+				}
+
+				reflection.Register(srv)
+
+				go func() {
+					err = srv.Serve(l)
+					if err != nil {
+						log.Error(err.Error())
+						return
+					}
+				}()
+
+				return nil
+			},
+			OnStop: func(ctx context.Context) error {
+				log.Sugar().Info("Gracefully stopping grpc server")
+				srv.GracefulStop()
+
+				return nil
+			},
+		},
+	)
 }
 
 // interceptorLogger Retrieved from

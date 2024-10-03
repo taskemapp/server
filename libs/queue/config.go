@@ -1,10 +1,11 @@
 package queue
 
 import (
-	"github.com/joho/godotenv"
-	"github.com/kelseyhightower/envconfig"
 	"os"
 	"path/filepath"
+
+	"github.com/joho/godotenv"
+	"github.com/kelseyhightower/envconfig"
 )
 
 type Config struct {

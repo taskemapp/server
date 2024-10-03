@@ -11,6 +11,12 @@ coverage: test
 submodule:
 	@git submodule update --remote --recursive
 
+server-compose:
+	docker compose build server && docker compose up server
+
+run-server:
+	go run apps/server/cmd/server/main.go
+
 gen:
 	@./scripts/gen_proto.sh
 

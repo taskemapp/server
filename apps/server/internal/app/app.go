@@ -2,26 +2,26 @@ package app
 
 import (
 	"context"
-	"database/sql"
 	"fmt"
+	"github.com/taskemapp/server/apps/server/internal/pkg/notifier"
+	"net/url"
+
 	"github.com/go-redis/redis/v8"
 	"github.com/jackc/pgx/v5/pgxpool"
 	_ "github.com/jackc/pgx/v5/stdlib"
-	"github.com/pressly/goose/v3"
 	amqp "github.com/rabbitmq/amqp091-go"
 	"github.com/taskemapp/server/apps/server/internal/app/auth"
+	"github.com/taskemapp/server/apps/server/internal/app/grpc"
 	grpcsrv "github.com/taskemapp/server/apps/server/internal/app/grpc"
 	"github.com/taskemapp/server/apps/server/internal/app/task"
 	"github.com/taskemapp/server/apps/server/internal/app/team"
 	"github.com/taskemapp/server/apps/server/internal/config"
 	"github.com/taskemapp/server/apps/server/internal/grpc/interceptors"
+	"github.com/taskemapp/server/apps/server/internal/pkg/migrations"
+	"github.com/taskemapp/server/apps/server/internal/pkg/s3"
 	"github.com/taskemapp/server/libs/queue"
 	"go.uber.org/fx"
 	"go.uber.org/zap"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/reflection"
-	"net"
-	"net/url"
 )
 
 const (
@@ -35,10 +35,17 @@ var App = fx.Options(
 	fx.Provide(setupPgPool),
 	fx.Provide(setupRabbitMq),
 	fx.Provide(setupRedisClient),
+	fx.Provide(fx.Annotate(func(cfg config.Config) *notifier.BasicGenerator {
+		return &notifier.BasicGenerator{HostDomain: cfg.HostDomain}
+	}, fx.As(new(notifier.LinkGenerator)))),
 
 	//RabbitMq
 	fx.Provide(queue.NewConfig),
 	fx.Provide(fx.Annotate(queue.NewMQ, fx.As(new(queue.Queue)))),
+
+	//S3
+	fx.Provide(s3.NewConfig),
+	fx.Provide(s3.New),
 
 	//General app
 	auth.App,
@@ -48,64 +55,24 @@ var App = fx.Options(
 	fx.Provide(grpcsrv.New),
 
 	fx.Invoke(
-		func(p *pgxpool.Pool, c config.Config, log *zap.Logger) error {
-			if err := goose.SetDialect("pgx"); err != nil {
-				log.Sugar().Error("Failed to set dialect: ", err)
-				return err
-			}
-			db, err := sql.Open("pgx", c.PostgresUrl)
-			if err != nil {
-				log.Sugar().Error("Failed to open db conn: ", err)
-				return err
-			}
-			defer db.Close()
-
-			log.Sugar().Info("Run migrations")
-			err = goose.Up(db, "migrations")
-			if err != nil {
-				log.Sugar().Error("Migration failed: ", err)
-				return err
-			}
-
-			return nil
-		},
-		func(lc fx.Lifecycle, log *zap.Logger, c config.Config, srv *grpc.Server) {
-			lc.Append(
-				fx.Hook{
-					OnStart: func(ctx context.Context) error {
-						log.Sugar().Infof("Server starting on port %d", c.GrpcPort)
-
-						l, err := net.Listen("tcp", fmt.Sprintf(":%d", c.GrpcPort))
-						if err != nil {
-							return err
-						}
-
-						reflection.Register(srv)
-
-						go func() {
-							err = srv.Serve(l)
-							if err != nil {
-								log.Error(err.Error())
-								return
-							}
-						}()
-
-						return nil
-					},
-					OnStop: func(ctx context.Context) error {
-						log.Sugar().Info("Gracefully stopping grpc server")
-						srv.GracefulStop()
-
-						return nil
-					},
-				},
-			)
-		},
+		migrations.Invoke,
+		s3.Invoke,
+		grpc.Invoke,
 	),
 )
 
 func setupConfig() (config.Config, error) {
-	cfg, err := config.New()
+	var cfg config.Config
+	qCfg, err := queue.NewConfig()
+	if err != nil {
+		return cfg, err
+	}
+	s3Cfg, err := s3.NewConfig()
+	if err != nil {
+		return cfg, err
+	}
+
+	cfg, err = config.New(qCfg, s3Cfg)
 	if err != nil {
 		return cfg, err
 	}

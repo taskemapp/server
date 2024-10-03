@@ -32,29 +32,29 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
-  smtp:
-    image: ghcr.io/docker-mailserver/docker-mailserver:latest
-    restart: unless-stopped
+  # smtp:
+  #   image: ghcr.io/docker-mailserver/docker-mailserver:latest
+  #   restart: unless-stopped
 
 
-  listmonk:
-    image: listmonk/listmonk:latest
-    restart: unless-stopped
-    depends_on:
-      - db
-    ports:
-      - "9000:9000"
-    command: [ sh, -c, "yes | ./listmonk --install --config=\"\" && ./listmonk" ]
-    environment:
-      LISTMONK_app__address: "0.0.0.0:9000"
-      LISTMONK_app__admin_username: taskem
-      LISTMONK_app__admin_password: taskem
-      LISTMONK_db__host: db
-      LISTMONK_db__port: 5432
-      LISTMONK_db__user: taskem
-      LISTMONK_db__password: taskem
-      LISTMONK_db__database: taskem
-      LISTMONK_db__ssl_mode: disable
+  # listmonk:
+  #   image: listmonk/listmonk:latest
+  #   restart: unless-stopped
+  #   depends_on:
+  #     - db
+  #   ports:
+  #     - "9000:9000"
+  #   command: [ sh, -c, "yes | ./listmonk --install --config=\"\" && ./listmonk" ]
+  #   environment:
+  #     LISTMONK_app__address: "0.0.0.0:9000"
+  #     LISTMONK_app__admin_username: taskem
+  #     LISTMONK_app__admin_password: taskem
+  #     LISTMONK_db__host: db
+  #     LISTMONK_db__port: 5432
+  #     LISTMONK_db__user: taskem
+  #     LISTMONK_db__password: taskem
+  #     LISTMONK_db__database: taskem
+  #     LISTMONK_db__ssl_mode: disable
 
   #  redis:
   #    image: redis
@@ -67,22 +67,22 @@ services:
   #      timeout: 5s
   #      retries: 5
 
-  #  minio:
-  #    image: quay.io/minio/minio
-  #    restart: always
-  #    command: server /data --console-address ":9001"
-  #    ports:
-  #      - "12200:9000"
-  #      - "9001:9001"
-  #    environment:
-  #      MINIO_ROOT_USER: root
-  #      MINIO_ROOT_PASSWORD: YOUR_PASSWORD
-  #      MINIO_DOMAIN: minio
-  #    networks:
-  #      default:
-  #        aliases:
-  #          - users.minio
-  #          - teams.minio
+  minio:
+    image: quay.io/minio/minio
+    restart: always
+    command: server /data --console-address ":9001"
+    ports:
+      - "12200:9000"
+      - "9001:9001"
+    environment:
+      MINIO_ROOT_USER: root
+      MINIO_ROOT_PASSWORD: password
+      MINIO_DOMAIN: minio
+    networks:
+      default:
+        aliases:
+          - users.minio
+          - teams.minio
 
   rabbitmq:
     image: rabbitmq:3.13.6-management
@@ -94,13 +94,19 @@ services:
       - "8080:15672"
 
   server:
-    env_file: .env.dev
+    env_file: .env
     build:
-      context: ./apps/server/
+      context: .
+      dockerfile: apps/server/Dockerfile
       target: final
+    develop:
+      watch:
+        - action: rebuild
+          path: apps/server/
     depends_on:
       - db
       - redis
+      - minio
     ports:
       - "50051:50051"
 

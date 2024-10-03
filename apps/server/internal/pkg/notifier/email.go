@@ -3,10 +3,11 @@ package notifier
 import (
 	"bytes"
 	"encoding/json"
+	"html/template"
+
 	"github.com/go-faster/errors"
 	"github.com/taskemapp/server/apps/notification/pkg/notifier"
 	"github.com/taskemapp/server/libs/queue"
-	"html/template"
 )
 
 type sendEmailOpts struct {

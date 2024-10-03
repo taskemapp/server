@@ -4,6 +4,8 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"testing"
+
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -11,7 +13,6 @@ import (
 	"github.com/taskemapp/server/apps/server/internal/config"
 	"github.com/taskemapp/server/libs/queue"
 	"github.com/taskemapp/server/libs/template"
-	"testing"
 )
 
 type testGenerator struct {
@@ -63,6 +64,7 @@ func setupMock(t *testing.T, tt args, generator LinkGenerator) *queue.MockQueue 
 		To:   tt.to,
 		From: tt.from,
 	})
+	assert.NoError(t, err)
 
 	message := queue.Message{
 		ContentType: "application/json",
@@ -79,7 +81,7 @@ func TestEmailAccountNotifier_VerifyEmail(t *testing.T) {
 	tt := args{
 		name:  "ripls",
 		to:    "ripls@taskem.test",
-		title: "",
+		title: "Verify your email",
 		from:  cfg.NoReplayEmail,
 	}
 

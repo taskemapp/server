@@ -18,8 +18,7 @@ LABEL org.opencontainers.image.source="https://github.com/taskemapp/notification
 # Leverage a cache mount to /go/pkg/mod/ to speed up subsequent builds.
 # Leverage bind mounts to go.sum and go.mod to avoid having to copy them into
 # the container.
-RUN --mount=type=cache,source=${PROJECT_PATH}/go/pkg/mod/,target=/go/pkg/mod/ \
-    --mount=type=bind,source=${PROJECT_PATH}/go.sum,target=go.sum \
+RUN --mount=type=bind,source=${PROJECT_PATH}/go.sum,target=go.sum \
     --mount=type=bind,source=${PROJECT_PATH}/go.mod,target=go.mod \
     go mod download -x
 
@@ -32,8 +31,7 @@ ARG TARGETARCH
 # Leverage a cache mount to /go/pkg/mod/ to speed up subsequent builds.
 # Leverage a bind mount to the current directory to avoid having to copy the
 # source code into the container.
-RUN --mount=type=cache,target=/go/pkg/mod/ \
-    --mount=type=bind,source=./${PROJECT_PATH}/,target=. \
+RUN --mount=type=bind,source=./${PROJECT_PATH}/,target=. \
     CGO_ENABLED=0 GOARCH=$TARGETARCH go build -o /bin/notification ./cmd/notification
 
 ################################################################################
@@ -74,7 +72,7 @@ USER appuser
 # Copy the executable from the "build" stage.
 COPY --from=build /bin/notification /bin/
 # Expose the port that the application listens on.
-EXPOSE 50051
+EXPOSE 50052
 
 # What the container should run when it is started.
 ENTRYPOINT [ "/bin/notification" ]

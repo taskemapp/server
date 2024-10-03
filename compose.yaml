@@ -99,26 +99,24 @@ services:
       context: .
       dockerfile: apps/server/Dockerfile
       target: final
-    develop:
-      watch:
-        - action: rebuild
-          path: apps/server/
     depends_on:
       - db
       - redis
       - minio
+      - rabbitmq
     ports:
       - "50051:50051"
 
-#  notification:
-#    env_file: ".env"
-#    build:
-#      context: ./apps/server/
-#      target: final
-#    depends_on:
-#      - db
-#    ports:
-#      - 50051:50051
+  notification:
+    env_file: ".env"
+    build:
+      context: ./apps/server/
+      target: final
+    depends_on:
+      - db
+      - rabbitmq
+    ports:
+      - "50052:50052"
 
 volumes:
   db-data:

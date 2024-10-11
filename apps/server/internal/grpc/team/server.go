@@ -9,7 +9,7 @@ import (
 	"github.com/taskemapp/server/apps/server/internal/config"
 	"github.com/taskemapp/server/apps/server/internal/grpc/interceptors"
 	"github.com/taskemapp/server/apps/server/internal/mapper"
-	"github.com/taskemapp/server/apps/server/internal/repositories/token"
+	"github.com/taskemapp/server/apps/server/internal/repository/token"
 	"github.com/taskemapp/server/apps/server/internal/service"
 	"github.com/taskemapp/server/apps/server/internal/service/team"
 	v1 "github.com/taskemapp/server/apps/server/tools/gen/grpc/v1"

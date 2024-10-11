@@ -2,8 +2,8 @@ package team
 
 import (
 	teamserver "github.com/taskemapp/server/apps/server/internal/grpc/team"
-	"github.com/taskemapp/server/apps/server/internal/repositories/team"
-	"github.com/taskemapp/server/apps/server/internal/repositories/team_member"
+	"github.com/taskemapp/server/apps/server/internal/repository/team"
+	"github.com/taskemapp/server/apps/server/internal/repository/team_member"
 	teamservice "github.com/taskemapp/server/apps/server/internal/service/team"
 	"go.uber.org/fx"
 )

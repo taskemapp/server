@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/taskemapp/server/apps/server/internal/pkg/notifier"
+	"github.com/taskemapp/server/apps/server/internal/repository/user_file"
 	"net/url"
 
 	"github.com/go-redis/redis/v8"
@@ -46,6 +47,8 @@ var App = fx.Options(
 	//S3
 	fx.Provide(s3.NewConfig),
 	fx.Provide(s3.New),
+
+	fx.Provide(fx.Annotate(user_file.New, fx.As(new(user_file.Repository)))),
 
 	//General app
 	auth.App,

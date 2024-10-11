@@ -1,7 +1,7 @@
 package task
 
 import (
-	"github.com/taskemapp/server/apps/server/internal/repositories/task"
+	"github.com/taskemapp/server/apps/server/internal/repository/task"
 	"go.uber.org/fx"
 )
 

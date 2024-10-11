@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-
 	"github.com/taskemapp/server/apps/server/internal/app"
 	"go.uber.org/fx"
 )
@@ -16,9 +15,7 @@ func main() {
 
 	defer func(app *fx.App, ctx context.Context) {
 		err := app.Stop(ctx)
-		if err != nil {
-
-		}
+		panic(err)
 	}(a, context.Background())
 
 	<-a.Done()

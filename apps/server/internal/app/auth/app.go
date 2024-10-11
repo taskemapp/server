@@ -3,8 +3,8 @@ package auth
 import (
 	authserver "github.com/taskemapp/server/apps/server/internal/grpc/auth"
 	"github.com/taskemapp/server/apps/server/internal/pkg/notifier"
-	"github.com/taskemapp/server/apps/server/internal/repositories/token"
-	"github.com/taskemapp/server/apps/server/internal/repositories/user"
+	"github.com/taskemapp/server/apps/server/internal/repository/token"
+	"github.com/taskemapp/server/apps/server/internal/repository/user"
 	authservice "github.com/taskemapp/server/apps/server/internal/service/auth"
 	"go.uber.org/fx"
 )

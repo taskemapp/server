@@ -7,8 +7,8 @@ import (
 	"github.com/taskemapp/server/apps/server/internal/config"
 	"github.com/taskemapp/server/apps/server/internal/pkg/jwt"
 	"github.com/taskemapp/server/apps/server/internal/pkg/notifier"
-	"github.com/taskemapp/server/apps/server/internal/repositories/token"
-	"github.com/taskemapp/server/apps/server/internal/repositories/user"
+	"github.com/taskemapp/server/apps/server/internal/repository/token"
+	"github.com/taskemapp/server/apps/server/internal/repository/user"
 	"go.uber.org/fx"
 )
 

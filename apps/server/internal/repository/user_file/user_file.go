@@ -11,7 +11,7 @@ type Repository interface {
 
 type CreateUserFileOpts struct {
 	UserName string
-	FilePath string
+	FileName string
 	File     bytes.Buffer
 	// MimeType for set use mime package
 	//

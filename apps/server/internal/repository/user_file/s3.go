@@ -33,11 +33,15 @@ func New(opts Opts) *File {
 // Create loads the file into S3 storage and returns information about the file.
 func (s File) Create(ctx context.Context, opts CreateUserFileOpts) (*UserFile, error) {
 	file := opts.File
+	filePath := strings.Join([]string{
+		opts.UserName,
+		opts.FileName,
+	}, "/")
 
 	_, err := s.s3.PutObject(
 		ctx,
 		s.s3Cfg.Bucket,
-		opts.FilePath,
+		filePath,
 		&file,
 		int64(file.Len()),
 		minio.PutObjectOptions{
@@ -50,8 +54,8 @@ func (s File) Create(ctx context.Context, opts CreateUserFileOpts) (*UserFile, e
 	}
 
 	return &UserFile{
-		CdnPath:  s.buildFileURL(opts.FilePath),
-		FileName: opts.FilePath,
+		CdnPath:  s.buildFileURL(opts.FileName),
+		FileName: opts.FileName,
 		MimeType: opts.MimeType,
 	}, nil
 }

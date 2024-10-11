@@ -56,7 +56,7 @@ func (n *EmailAccountNotifier) VerifyEmail(username string, email string) error 
 			ConfirmationLink: confirmLink,
 			UnsubscribeLink:  unsubLink,
 		},
-		title: "",
+		title: "Verify your email",
 		to:    email,
 		from:  n.config.NoReplayEmail,
 	})

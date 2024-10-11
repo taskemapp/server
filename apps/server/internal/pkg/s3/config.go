@@ -1,4 +1,4 @@
-package queue
+package s3
 
 import (
 	"os"
@@ -9,7 +9,12 @@ import (
 )
 
 type Config struct {
-	Url string `envconfig:"RABBITMQ_URL" required:"true"`
+	Host        string `envconfig:"S3_HOST"`
+	AccessToken string `envconfig:"S3_ACCESS_TOKEN"`
+	SecretToken string `envconfig:"S3_SECRET_TOKEN"`
+	Region      string `envconfig:"S3_REGION"`
+	Bucket      string `envconfig:"S3_BUCKET"`
+	Secure      bool   `envconfig:"S3_SECURE"`
 }
 
 func NewConfig() (Config, error) {

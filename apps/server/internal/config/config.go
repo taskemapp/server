@@ -3,6 +3,7 @@ package config
 import (
 	"github.com/joho/godotenv"
 	"github.com/kelseyhightower/envconfig"
+	"github.com/taskemapp/server/apps/server/internal/pkg/s3"
 	"github.com/taskemapp/server/libs/queue"
 	"os"
 	"path/filepath"
@@ -28,14 +29,13 @@ type Config struct {
 
 	HostDomain string `envconfig:"HOST_DOMAIN"`
 
-	S3Host        string `envconfig:"S3_HOST"`
-	S3AccessToken string `envconfig:"S3_ACCESS_TOKEN"`
-	S3SecretToken string `envconfig:"S3_SECRET_TOKEN"`
-	S3Region      string `envconfig:"S3_REGION"`
-	S3Bucket      string `envconfig:"S3_BUCKET"`
+	S3 s3.Config
 }
 
-func New() (Config, error) {
+func New(
+	qCfg queue.Config,
+	s3Cfg s3.Config,
+) (Config, error) {
 	cfg := Config{}
 
 	wd, err := os.Getwd()
@@ -51,12 +51,8 @@ func New() (Config, error) {
 		return cfg, err
 	}
 
-	mqConfig, err := queue.NewConfig()
-	if err != nil {
-		panic(err)
-	}
-
-	cfg.RabbitMq = mqConfig
+	cfg.RabbitMq = qCfg
+	cfg.S3 = s3Cfg
 
 	return cfg, nil
 }

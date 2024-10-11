@@ -20,8 +20,8 @@ require (
 	github.com/rabbitmq/amqp091-go v1.10.0
 	github.com/samber/lo v1.47.0
 	github.com/stretchr/testify v1.9.0
-	github.com/taskemapp/server/apps/notification v0.0.0-20240823134806-8d5115da9e2c
-	github.com/taskemapp/server/libs/queue v0.0.0-20240831183951-3fedede642c3
+	github.com/taskemapp/server/apps/notification v0.0.0-20240920224238-1123d7cd13f6
+	github.com/taskemapp/server/libs/queue v0.0.0-20240906120508-8de35b503387
 	github.com/taskemapp/server/libs/template v0.0.0-20240912173021-e7f2908c811b
 	go.uber.org/fx v1.22.2
 	go.uber.org/multierr v1.11.0

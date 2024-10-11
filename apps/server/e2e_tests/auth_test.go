@@ -3,17 +3,22 @@ package e2e_tests
 import (
 	"context"
 	"fmt"
+	"testing"
+
 	"github.com/brianvoe/gofakeit/v7"
 	"github.com/stretchr/testify/require"
 	"github.com/taskemapp/server/apps/server/internal/config"
+	"github.com/taskemapp/server/apps/server/internal/pkg/s3"
 	v1 "github.com/taskemapp/server/apps/server/tools/gen/grpc/v1"
+	"github.com/taskemapp/server/libs/queue"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
-	"testing"
 )
 
 var (
-	cfg, _       = config.New()
+	qCfg, _      = queue.NewConfig()
+	s3Cfg, _     = s3.NewConfig()
+	cfg, _       = config.New(qCfg, s3Cfg)
 	testEmail    = gofakeit.Email()
 	testPassword = gofakeit.Password(true, true, true, true, false, 8)
 )

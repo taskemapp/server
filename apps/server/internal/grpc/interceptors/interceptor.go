@@ -2,7 +2,7 @@ package interceptors
 
 import (
 	"github.com/taskemapp/server/apps/server/internal/config"
-	"github.com/taskemapp/server/apps/server/internal/repositories/token"
+	"github.com/taskemapp/server/apps/server/internal/repository/token"
 	"go.uber.org/fx"
 )
 

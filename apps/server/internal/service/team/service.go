@@ -3,9 +3,9 @@ package team
 import (
 	"context"
 	"github.com/google/uuid"
-	"github.com/taskemapp/server/apps/server/internal/repositories/team"
-	"github.com/taskemapp/server/apps/server/internal/repositories/team_member"
-	"github.com/taskemapp/server/apps/server/internal/repositories/token"
+	"github.com/taskemapp/server/apps/server/internal/repository/team"
+	"github.com/taskemapp/server/apps/server/internal/repository/team_member"
+	"github.com/taskemapp/server/apps/server/internal/repository/token"
 	"github.com/taskemapp/server/apps/server/internal/service"
 	"go.uber.org/fx"
 	"go.uber.org/zap"

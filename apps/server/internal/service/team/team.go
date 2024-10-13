@@ -3,7 +3,7 @@ package team
 import (
 	"context"
 	"github.com/google/uuid"
-	"github.com/taskemapp/server/apps/server/internal/repositories/team"
+	"github.com/taskemapp/server/apps/server/internal/repository/team"
 	"github.com/taskemapp/server/apps/server/internal/service"
 )
 

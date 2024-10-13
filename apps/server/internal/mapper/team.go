@@ -2,7 +2,7 @@ package mapper
 
 import (
 	"github.com/samber/lo"
-	"github.com/taskemapp/server/apps/server/internal/repositories/team"
+	"github.com/taskemapp/server/apps/server/internal/repository/team"
 	v1 "github.com/taskemapp/server/apps/server/tools/gen/grpc/v1"
 )
 

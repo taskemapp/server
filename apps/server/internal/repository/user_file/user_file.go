@@ -6,6 +6,7 @@ import (
 )
 
 type Repository interface {
+	// Create loads the file into S3 storage and returns information about the file.
 	Create(ctx context.Context, opts CreateUserFileOpts) (*UserFile, error)
 }
 

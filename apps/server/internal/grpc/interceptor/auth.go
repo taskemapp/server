@@ -1,19 +1,19 @@
-package interceptors
+package interceptor
 
 import (
 	"context"
 	"fmt"
 	"github.com/go-faster/errors"
 	"github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/auth"
-	"github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/logging"
 	"github.com/taskemapp/server/apps/server/internal/pkg/jwt"
 	"github.com/taskemapp/server/apps/server/internal/repository/token"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
 
-type TokenKey struct{}
-type TokenPayload struct{}
+type CtxKey struct {
+	key string
+}
 
 // Auth get token from grpc request metadata
 //
@@ -26,6 +26,29 @@ func (i *Interceptor) Auth(ctx context.Context) (context.Context, error) {
 
 	claims, err := jwt.GetPayload(tokenMd, i.c.TokenSecret)
 
+	ctx, err = matchTokenErr(ctx, err)
+	if err != nil {
+		return ctx, err
+	}
+
+	payload := *claims
+
+	_, err = i.tokenRepo.GetToken(ctx, fmt.Sprintf("%s:%s", payload["type"].(string), payload["uid"].(string)))
+	if err != nil {
+		switch {
+		case errors.Is(err, token.ErrNotFound):
+			return nil, status.Errorf(codes.InvalidArgument, "Wrong token provided")
+		default:
+			return nil, status.Errorf(codes.Internal, "Internal error")
+		}
+	}
+
+	ctx, err = provideUserID(ctx, payload)
+
+	return ctx, nil
+}
+
+func matchTokenErr(ctx context.Context, err error) (context.Context, error) {
 	if err != nil {
 		switch {
 		case errors.Is(err, jwt.ErrTokenExpired):
@@ -38,22 +61,5 @@ func (i *Interceptor) Auth(ctx context.Context) (context.Context, error) {
 			return nil, status.Errorf(codes.Internal, "Internal error")
 		}
 	}
-
-	payload := *claims
-
-	_, err = i.tokenRepo.GetToken(ctx, fmt.Sprintf("%s:%s", payload["type"].(string), payload["uid"].(string)))
-	if err != nil {
-		switch {
-		case errors.Is(err, token.ErrNotFound):
-			return nil, status.Errorf(codes.Unauthenticated, "Wrong token")
-		default:
-			return nil, status.Errorf(codes.Internal, "Internal error")
-		}
-	}
-
-	ctx = logging.InjectFields(ctx, logging.Fields{"auth.sub", payload})
-	ctx = context.WithValue(ctx, TokenKey{}, tokenMd)
-	ctx = context.WithValue(ctx, TokenPayload{}, payload)
-
 	return ctx, nil
 }

@@ -11,7 +11,7 @@ import (
 	"github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/selector"
 	"github.com/taskemapp/server/apps/server/internal/config"
 	"github.com/taskemapp/server/apps/server/internal/grpc/auth"
-	"github.com/taskemapp/server/apps/server/internal/grpc/interceptors"
+	"github.com/taskemapp/server/apps/server/internal/grpc/interceptor"
 	"github.com/taskemapp/server/apps/server/internal/grpc/team"
 	v1 "github.com/taskemapp/server/apps/server/tools/gen/grpc/v1"
 	"go.uber.org/fx"
@@ -27,7 +27,7 @@ type Opts struct {
 	AuthServer *auth.Server
 	TeamServer *team.Server
 	Log        *zap.Logger
-	Ic         *interceptors.Interceptor
+	Ic         *interceptor.Interceptor
 }
 
 type App struct {
@@ -53,6 +53,7 @@ func New(opts Opts) App {
 	srv := grpc.NewServer(
 		grpc.ChainUnaryInterceptor(
 			selector.UnaryServerInterceptor(authMd.UnaryServerInterceptor(opts.Ic.Auth), selector.MatchFunc(opts.Ic.AuthMatcher)),
+			opts.Ic.ProvideRID(),
 			recovery.UnaryServerInterceptor(recoveryOpts...),
 			logging.UnaryServerInterceptor(interceptorLogger(opts.Log), logOpts...),
 		),

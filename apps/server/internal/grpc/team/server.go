@@ -2,12 +2,10 @@ package team
 
 import (
 	"context"
-	"github.com/golang-jwt/jwt/v5"
-	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/pkg/errors"
 	"github.com/taskemapp/server/apps/server/internal/config"
-	"github.com/taskemapp/server/apps/server/internal/grpc/interceptors"
+	"github.com/taskemapp/server/apps/server/internal/grpc/interceptor"
 	"github.com/taskemapp/server/apps/server/internal/mapper"
 	"github.com/taskemapp/server/apps/server/internal/repository/token"
 	"github.com/taskemapp/server/apps/server/internal/service"
@@ -46,10 +44,7 @@ func New(opts Opts) *Server {
 }
 
 func (t *Server) Get(ctx context.Context, request *v1.GetTeamRequest) (*v1.TeamResponse, error) {
-	payload := (ctx.Value(interceptors.TokenPayload{})).(jwt.MapClaims)
-
-	var uid uuid.UUID
-	uid, err := uuid.Parse(payload["uid"].(string))
+	uid, err := interceptor.GetUserID(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -62,18 +57,15 @@ func (t *Server) Get(ctx context.Context, request *v1.GetTeamRequest) (*v1.TeamR
 }
 
 func (t *Server) GetUserTeams(ctx context.Context, empty *emptypb.Empty) (*v1.GetAllTeamsResponse, error) {
-	payload := (ctx.Value(interceptors.TokenPayload{})).(jwt.MapClaims)
-
-	var uid uuid.UUID
-	uid, err := uuid.Parse(payload["uid"].(string))
+	uid, err := interceptor.GetUserID(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	page := payload["page"].(int)
+	// TODO(ripls56): get page and limit from metadata
 
 	res, err := t.team.GetUserTeams(ctx, uid, service.PaginationOpts{
-		Page:    page,
+		Page:    0,
 		PerPage: 30,
 	})
 	if err != nil {
@@ -88,10 +80,7 @@ func (t *Server) GetAllCanJoin(ctx context.Context, empty *emptypb.Empty) (*v1.G
 }
 
 func (t *Server) Create(ctx context.Context, request *v1.CreateTeamRequest) (*v1.CreateTeamResponse, error) {
-	payload := (ctx.Value(interceptors.TokenPayload{})).(jwt.MapClaims)
-
-	var uid uuid.UUID
-	uid, err := uuid.Parse(payload["uid"].(string))
+	uid, err := interceptor.GetUserID(ctx)
 	if err != nil {
 		return nil, err
 	}

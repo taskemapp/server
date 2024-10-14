@@ -62,12 +62,15 @@ func NewToken(opts Opts) (token string, err error) {
 	return tokenString, nil
 }
 
+// Claims wrap jwt.MapClaims to get rid of import conflict
+type Claims jwt.MapClaims
+
 // GetPayload undirected call `Validate` method,
 // so if u use this method, u don't need to call `Validate` again
 //
 // Throws: ErrTokenValidation, ErrTokenParse
 // if token expired throws ErrTokenExpired
-func GetPayload(token string, secret string) (*jwt.MapClaims, error) {
+func GetPayload(token string, secret string) (*Claims, error) {
 	valid, err := Validate(token, secret)
 	if err != nil {
 		switch {
@@ -84,14 +87,19 @@ func GetPayload(token string, secret string) (*jwt.MapClaims, error) {
 	if !ok {
 		return nil, ErrTokenParse
 	}
-	return &claims, nil
+
+	c := Claims(claims)
+	return &c, nil
 }
+
+// Token wrap jwt.Token to get rid of import conflict
+type Token *jwt.Token
 
 // Validate provided token using secret
 //
 // Throws: ErrTokenParse, ErrTokenValidation, ErrTokenExpired
-func Validate(token string, secret string) (*jwt.Token, error) {
-	parsed, err := jwt.Parse(token, func(token *jwt.Token) (interface{}, error) {
+func Validate(given string, secret string) (Token, error) {
+	parsed, err := jwt.Parse(given, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, ErrTokenSigningValidation
 		}
@@ -102,10 +110,12 @@ func Validate(token string, secret string) (*jwt.Token, error) {
 		return nil, ErrTokenParse
 	}
 
+	token := Token(parsed)
+
 	switch {
-	case parsed.Valid:
-		return parsed, nil
-	case !parsed.Valid:
+	case token.Valid:
+		return token, nil
+	case !token.Valid:
 		return nil, ErrTokenValidation
 	case errors.Is(err, jwt.ErrTokenSignatureInvalid):
 		return nil, ErrTokenParse

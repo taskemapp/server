@@ -27,8 +27,6 @@ func NewClient(opts Opts) (*Client, error) {
 	}, nil
 }
 
-// SetToken store auth token in `in memory storage`, where key defined as
-// tokenType:userID
 func (rc *Client) SetToken(ctx context.Context, opts CreateOpts) error {
 	val, err := rc.client.Set(
 		ctx,
@@ -46,8 +44,6 @@ func (rc *Client) SetToken(ctx context.Context, opts CreateOpts) error {
 	return nil
 }
 
-// GetToken get auth token from `in memory storage`, where key defined as
-// tokenType:userID
 func (rc *Client) GetToken(ctx context.Context, key string) (string, error) {
 	val, err := rc.client.Get(ctx, key).Result()
 	if errors.Is(err, redis.Nil) {

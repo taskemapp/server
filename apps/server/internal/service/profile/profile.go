@@ -11,5 +11,5 @@ type Service interface {
 }
 
 type UploadAvatarOpts struct {
-	avatar bytes.Buffer
+	Avatar bytes.Buffer
 }

@@ -17,7 +17,7 @@ import (
 	"github.com/taskemapp/server/apps/server/internal/app/task"
 	"github.com/taskemapp/server/apps/server/internal/app/team"
 	"github.com/taskemapp/server/apps/server/internal/config"
-	"github.com/taskemapp/server/apps/server/internal/grpc/interceptors"
+	"github.com/taskemapp/server/apps/server/internal/grpc/interceptor"
 	"github.com/taskemapp/server/apps/server/internal/pkg/migrations"
 	"github.com/taskemapp/server/apps/server/internal/pkg/s3"
 	"github.com/taskemapp/server/libs/queue"
@@ -54,7 +54,7 @@ var App = fx.Options(
 	auth.App,
 	team.App,
 	task.App,
-	fx.Provide(interceptors.New),
+	fx.Provide(interceptor.New),
 	fx.Provide(grpcsrv.New),
 
 	fx.Invoke(

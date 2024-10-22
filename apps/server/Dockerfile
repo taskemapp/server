@@ -1,9 +1,8 @@
 # syntax=docker/dockerfile:1
 
-################################################################################
 ARG GO_VERSION=1.23.0
 
-FROM --platform=$BUILDPLATFORM golang:${GO_VERSION} AS build
+FROM --platform=$BUILDPLATFORM golang:${GO_VERSION}-bookworm AS build
 WORKDIR /src
 
 ARG PROJECT_PATH=apps/server
@@ -20,18 +19,19 @@ RUN DEBIAN_FRONTEND=noninteractive \
     build-essential \
     pkg-config \
     libglib2.0-dev \
-    libexpat1-dev \
     libjpeg62-turbo-dev \
     libtiff5-dev \
-    libarchive-dev \
     meson \
-    ninja-build && \
+    ninja-build \
+    libwebp-dev \
+    libarchive-dev \
+    libexpat1-dev && \
     rm -rf /var/lib/apt/lists/*
 
 RUN wget https://github.com/libvips/libvips/releases/download/v${LIBVIPS_VERSION}/vips-${LIBVIPS_VERSION}.tar.xz && \
     tar -xf vips-${LIBVIPS_VERSION}.tar.xz && \
     cd vips-${LIBVIPS_VERSION} && \
-    meson setup build --prefix /usr/local --libdir lib && \
+    meson setup build --prefix /usr/local --buildtype=release && \
     meson compile -C build && \
     meson install -C build && \
     ldconfig && \
@@ -43,9 +43,37 @@ RUN --mount=type=bind,source=./${PROJECT_PATH}/,target=. \
     CGO_ENABLED=1 GOARCH=$TARGETARCH go build -o /bin/server ./cmd/server
 
 ################################################################################
-FROM gcr.io/distroless/base-debian12:nonroot AS final
+FROM debian:bookworm-slim AS final
 
 COPY --from=build /usr/local/lib /usr/local/lib
+
+RUN DEBIAN_FRONTEND=noninteractive \
+  apt-get update && \
+  apt-get install --no-install-recommends -y \
+  libglib2.0-0 \
+  libjpeg62-turbo \
+  libpng16-16 \
+  libtiff6 \
+  libwebp7 \
+  libwebpmux3 \
+  libwebpdemux2 \
+  libarchive13 \
+  libexpat1 && \
+  apt-get autoremove -y && \
+  apt-get autoclean && \
+  apt-get clean && \
+  rm -rf /var/lib/apt/lists/*
+
+ARG UID=10001
+RUN adduser \
+    --disabled-password \
+    --gecos "" \
+    --home "/nonexistent" \
+    --shell "/sbin/nologin" \
+    --no-create-home \
+    --uid "${UID}" \
+    appuser
+USER appuser
 
 ENV LD_LIBRARY_PATH="/usr/local/lib"
 

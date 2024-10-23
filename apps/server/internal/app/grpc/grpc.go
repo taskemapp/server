@@ -3,6 +3,7 @@ package grpc
 import (
 	"context"
 	"fmt"
+	"github.com/taskemapp/server/apps/server/internal/grpc/profile"
 	"net"
 
 	authMd "github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/auth"
@@ -11,7 +12,7 @@ import (
 	"github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/selector"
 	"github.com/taskemapp/server/apps/server/internal/config"
 	"github.com/taskemapp/server/apps/server/internal/grpc/auth"
-	"github.com/taskemapp/server/apps/server/internal/grpc/interceptors"
+	"github.com/taskemapp/server/apps/server/internal/grpc/interceptor"
 	"github.com/taskemapp/server/apps/server/internal/grpc/team"
 	v1 "github.com/taskemapp/server/apps/server/tools/gen/grpc/v1"
 	"go.uber.org/fx"
@@ -24,10 +25,11 @@ import (
 
 type Opts struct {
 	fx.In
-	AuthServer *auth.Server
-	TeamServer *team.Server
-	Log        *zap.Logger
-	Ic         *interceptors.Interceptor
+	AuthServer    *auth.Server
+	ProfileServer *profile.Server
+	TeamServer    *team.Server
+	Log           *zap.Logger
+	Ic            *interceptor.Interceptor
 }
 
 type App struct {
@@ -53,6 +55,7 @@ func New(opts Opts) App {
 	srv := grpc.NewServer(
 		grpc.ChainUnaryInterceptor(
 			selector.UnaryServerInterceptor(authMd.UnaryServerInterceptor(opts.Ic.Auth), selector.MatchFunc(opts.Ic.AuthMatcher)),
+			opts.Ic.ProvideRID(),
 			recovery.UnaryServerInterceptor(recoveryOpts...),
 			logging.UnaryServerInterceptor(interceptorLogger(opts.Log), logOpts...),
 		),
@@ -64,6 +67,7 @@ func New(opts Opts) App {
 	)
 
 	v1.RegisterAuthServer(srv, opts.AuthServer)
+	v1.RegisterProfileServer(srv, opts.ProfileServer)
 	v1.RegisterTeamServer(srv, opts.TeamServer)
 
 	return App{Srv: srv}

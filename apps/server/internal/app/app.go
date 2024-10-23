@@ -3,8 +3,8 @@ package app
 import (
 	"context"
 	"fmt"
+	"github.com/taskemapp/server/apps/server/internal/app/profile"
 	"github.com/taskemapp/server/apps/server/internal/pkg/notifier"
-	"github.com/taskemapp/server/apps/server/internal/repository/user_file"
 	"net/url"
 
 	"github.com/go-redis/redis/v8"
@@ -17,7 +17,7 @@ import (
 	"github.com/taskemapp/server/apps/server/internal/app/task"
 	"github.com/taskemapp/server/apps/server/internal/app/team"
 	"github.com/taskemapp/server/apps/server/internal/config"
-	"github.com/taskemapp/server/apps/server/internal/grpc/interceptors"
+	"github.com/taskemapp/server/apps/server/internal/grpc/interceptor"
 	"github.com/taskemapp/server/apps/server/internal/pkg/migrations"
 	"github.com/taskemapp/server/apps/server/internal/pkg/s3"
 	"github.com/taskemapp/server/libs/queue"
@@ -48,13 +48,12 @@ var App = fx.Options(
 	fx.Provide(s3.NewConfig),
 	fx.Provide(s3.New),
 
-	fx.Provide(fx.Annotate(user_file.New, fx.As(new(user_file.Repository)))),
-
 	//General app
 	auth.App,
 	team.App,
+	profile.App,
 	task.App,
-	fx.Provide(interceptors.New),
+	fx.Provide(interceptor.New),
 	fx.Provide(grpcsrv.New),
 
 	fx.Invoke(

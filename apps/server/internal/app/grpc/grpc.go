@@ -3,6 +3,7 @@ package grpc
 import (
 	"context"
 	"fmt"
+	"github.com/taskemapp/server/apps/server/internal/grpc/profile"
 	"net"
 
 	authMd "github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/auth"
@@ -24,10 +25,11 @@ import (
 
 type Opts struct {
 	fx.In
-	AuthServer *auth.Server
-	TeamServer *team.Server
-	Log        *zap.Logger
-	Ic         *interceptor.Interceptor
+	AuthServer    *auth.Server
+	ProfileServer *profile.Server
+	TeamServer    *team.Server
+	Log           *zap.Logger
+	Ic            *interceptor.Interceptor
 }
 
 type App struct {
@@ -65,6 +67,7 @@ func New(opts Opts) App {
 	)
 
 	v1.RegisterAuthServer(srv, opts.AuthServer)
+	v1.RegisterProfileServer(srv, opts.ProfileServer)
 	v1.RegisterTeamServer(srv, opts.TeamServer)
 
 	return App{Srv: srv}

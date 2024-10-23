@@ -1,7 +1,6 @@
 package profile
 
 import (
-	"bytes"
 	"context"
 	"github.com/google/uuid"
 )
@@ -11,5 +10,5 @@ type Service interface {
 }
 
 type UploadAvatarOpts struct {
-	Avatar bytes.Buffer
+	Avatar []byte
 }

@@ -11,13 +11,13 @@ type Opts struct {
 	fx.In
 	Config    config.Config
 	TokenRepo token.Repository
-	Logger    zap.Logger
+	Logger    *zap.Logger
 }
 
 type Interceptor struct {
 	c         config.Config
 	tokenRepo token.Repository
-	logger    zap.Logger
+	logger    *zap.Logger
 }
 
 func New(opts Opts) *Interceptor {

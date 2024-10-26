@@ -14,7 +14,7 @@ import (
 
 func New(cfg Config) (*minio.Client, error) {
 	c, err := minio.New(cfg.Host, &minio.Options{
-		Creds:  credentials.NewStaticV4("root", "password", ""),
+		Creds:  credentials.NewStaticV4(cfg.AccessToken, cfg.SecretToken, ""),
 		Secure: cfg.Secure,
 	})
 	if err != nil {

@@ -3,7 +3,7 @@ package app
 import (
 	"context"
 	"fmt"
-	"github.com/taskemapp/server/apps/server/internal/app/profile"
+	"github.com/taskemapp/server/apps/server/internal/app/profilefx"
 	"github.com/taskemapp/server/apps/server/internal/pkg/notifier"
 	"net/url"
 
@@ -44,21 +44,16 @@ var App = fx.Options(
 	fx.Provide(queue.NewConfig),
 	fx.Provide(fx.Annotate(queue.NewMQ, fx.As(new(queue.Queue)))),
 
-	//S3
-	fx.Provide(s3.NewConfig),
-	fx.Provide(s3.New),
-
 	//General app
 	auth.App,
 	team.App,
-	profile.App,
+	profilefx.App,
 	task.App,
 	fx.Provide(interceptor.New),
 	fx.Provide(grpcsrv.New),
 
 	fx.Invoke(
 		migrations.Invoke,
-		s3.Invoke,
 		grpc.Invoke,
 	),
 )

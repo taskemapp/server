@@ -30,7 +30,6 @@ func New(opts Opts) *File {
 	}
 }
 
-// Create loads the file into S3 storage and returns information about the file.
 func (s File) Create(ctx context.Context, opts CreateUserFileOpts) (*UserFile, error) {
 	file := opts.File
 	filePath := strings.Join([]string{

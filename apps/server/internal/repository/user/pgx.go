@@ -26,11 +26,11 @@ type Pgx struct {
 	logger *zap.Logger
 }
 
-func NewPgx(opts Opts) (*Pgx, error) {
+func NewPgx(opts Opts) *Pgx {
 	return &Pgx{
 		pgx:    opts.Pgx,
 		logger: opts.Logger,
-	}, nil
+	}
 }
 
 var selectUserFields = []string{
@@ -53,11 +53,11 @@ func (p *Pgx) Update(ctx context.Context, userID uuid.UUID, opts UpdateOpts) (*U
 	}
 
 	if opts.Email != nil {
-		updateMap["email"] = *opts.DisplayName
+		updateMap["email"] = *opts.Email
 	}
 
 	if opts.AvatarUrl != nil {
-		updateMap["avatar_url"] = *opts.DisplayName
+		updateMap["avatar_url"] = *opts.AvatarUrl
 	}
 
 	if opts.IsVerified != nil {

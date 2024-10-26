@@ -7,7 +7,11 @@ import (
 )
 
 type Repository interface {
+	// GetToken get auth token from `in memory storage`, where key defined as
+	// tokenType:userID
 	GetToken(ctx context.Context, key string) (string, error)
+	// SetToken store auth token in `in memory storage`, where key defined as
+	// tokenType:userID
 	SetToken(ctx context.Context, opts CreateOpts) error
 	DelToken(ctx context.Context, key string) error
 }

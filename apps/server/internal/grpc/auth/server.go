@@ -3,9 +3,8 @@ package auth
 import (
 	"context"
 	"errors"
-	"github.com/google/uuid"
 	"github.com/taskemapp/server/apps/server/internal/config"
-	"github.com/taskemapp/server/apps/server/internal/pkg/jwt"
+	"github.com/taskemapp/server/apps/server/internal/grpc/interceptor"
 	"github.com/taskemapp/server/apps/server/internal/pkg/validation"
 	"github.com/taskemapp/server/apps/server/internal/repository/token"
 	"github.com/taskemapp/server/apps/server/internal/repository/user"
@@ -127,16 +126,10 @@ func (s *Server) RefreshToken(
 	ctx context.Context,
 	req *v1.RefreshTokenRequest,
 ) (*v1.RefreshTokenResponse, error) {
-	payload, err := jwt.GetPayload(req.Token, s.config.TokenSecret)
-	if err != nil {
-		return nil, status.Error(codes.InvalidArgument, err.Error())
-	}
 
-	var uid uuid.UUID
-	uid, err = uuid.Parse((*payload)["uid"].(string))
-
+	uid, err := interceptor.GetUserID(ctx)
 	if err != nil {
-		return nil, status.Error(codes.InvalidArgument, err.Error())
+		return nil, err
 	}
 
 	resp, err := s.auth.RefreshToken(
@@ -148,7 +141,7 @@ func (s *Server) RefreshToken(
 	)
 
 	if err != nil {
-		s.logger.Sugar().Warn(err)
+		s.logger.Error("refresh token failed", zap.Error(err))
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 

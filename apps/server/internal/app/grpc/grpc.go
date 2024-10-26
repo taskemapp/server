@@ -3,15 +3,15 @@ package grpc
 import (
 	"context"
 	"fmt"
-	"net"
-
+	"github.com/go-faster/errors"
 	authMd "github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/auth"
 	"github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/logging"
 	"github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/recovery"
 	"github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/selector"
 	"github.com/taskemapp/server/apps/server/internal/config"
 	"github.com/taskemapp/server/apps/server/internal/grpc/auth"
-	"github.com/taskemapp/server/apps/server/internal/grpc/interceptors"
+	"github.com/taskemapp/server/apps/server/internal/grpc/interceptor"
+	"github.com/taskemapp/server/apps/server/internal/grpc/profile"
 	"github.com/taskemapp/server/apps/server/internal/grpc/team"
 	v1 "github.com/taskemapp/server/apps/server/tools/gen/grpc/v1"
 	"go.uber.org/fx"
@@ -20,18 +20,20 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/reflection"
 	"google.golang.org/grpc/status"
+	"net"
+	"strconv"
 )
 
 type Opts struct {
 	fx.In
-	AuthServer *auth.Server
-	TeamServer *team.Server
-	Log        *zap.Logger
-	Ic         *interceptors.Interceptor
+	AuthServer    *auth.Server
+	ProfileServer *profile.Server
+	TeamServer    *team.Server
+	Log           *zap.Logger
+	Ic            *interceptor.Interceptor
 }
 
 type App struct {
-	fx.Out
 	Srv *grpc.Server
 }
 
@@ -53,6 +55,7 @@ func New(opts Opts) App {
 	srv := grpc.NewServer(
 		grpc.ChainUnaryInterceptor(
 			selector.UnaryServerInterceptor(authMd.UnaryServerInterceptor(opts.Ic.Auth), selector.MatchFunc(opts.Ic.AuthMatcher)),
+			opts.Ic.ProvideRID(),
 			recovery.UnaryServerInterceptor(recoveryOpts...),
 			logging.UnaryServerInterceptor(interceptorLogger(opts.Log), logOpts...),
 		),
@@ -64,38 +67,47 @@ func New(opts Opts) App {
 	)
 
 	v1.RegisterAuthServer(srv, opts.AuthServer)
+	v1.RegisterProfileServer(srv, opts.ProfileServer)
 	v1.RegisterTeamServer(srv, opts.TeamServer)
+	reflection.Register(srv)
 
 	return App{Srv: srv}
 }
 
-func Invoke(lc fx.Lifecycle, log *zap.Logger, c config.Config, srv *grpc.Server) {
+func (a App) Run(c config.Config) error {
+	l, err := net.Listen("tcp", fmt.Sprintf(":%d", c.GrpcPort))
+	if err != nil {
+		return errors.Wrap(err, "run")
+	}
+	if err = a.Srv.Serve(l); err != nil {
+		return errors.Wrap(err, "run")
+	}
+
+	return nil
+}
+
+func (a App) GracefulStop() {
+	a.Srv.GracefulStop()
+}
+
+func Invoke(lc fx.Lifecycle, log *zap.Logger, c config.Config, app App) {
 	lc.Append(
 		fx.Hook{
 			OnStart: func(ctx context.Context) error {
-				log.Sugar().Infof("Server starting on port %d", c.GrpcPort)
-
-				l, err := net.Listen("tcp", fmt.Sprintf(":%d", c.GrpcPort))
-				if err != nil {
-					return err
-				}
-
-				reflection.Register(srv)
-
 				go func() {
-					err = srv.Serve(l)
-					if err != nil {
-						log.Error(err.Error())
-						return
-					}
+					err := app.Run(c)
+					log.Error("server stopped", zap.Error(err))
 				}()
+
+				log.Info("Server started on port", zap.String("addr", strconv.Itoa(c.GrpcPort)))
 
 				return nil
 			},
 			OnStop: func(ctx context.Context) error {
-				log.Sugar().Info("Gracefully stopping grpc server")
-				srv.GracefulStop()
+				log.Info("Gracefully stopping grpc server")
+				app.GracefulStop()
 
+				log.Info("Server stopped")
 				return nil
 			},
 		},

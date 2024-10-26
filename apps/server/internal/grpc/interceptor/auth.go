@@ -33,6 +33,7 @@ func (i *Interceptor) Auth(ctx context.Context) (context.Context, error) {
 
 	payload := *claims
 
+	// TODO: переделать на стринг билдер
 	_, err = i.tokenRepo.GetToken(ctx, fmt.Sprintf("%s:%s", payload["type"].(string), payload["uid"].(string)))
 	if err != nil {
 		switch {
@@ -54,7 +55,7 @@ func matchTokenErr(ctx context.Context, err error) (context.Context, error) {
 		case errors.Is(err, jwt.ErrTokenExpired):
 			return nil, status.Errorf(codes.Unauthenticated, "Token expired")
 		case errors.Is(err, jwt.ErrTokenParse):
-			return nil, status.Errorf(codes.InvalidArgument, "Token parse error")
+			return nil, status.Errorf(codes.InvalidArgument, "Wrong token signature")
 		case errors.Is(err, jwt.ErrTokenValidation):
 			return nil, status.Errorf(codes.Unauthenticated, "Token validation error")
 		default:

@@ -66,7 +66,7 @@ func (p *Profile) UploadAvatar(ctx context.Context, userID uuid.UUID, opts Uploa
 	if err != nil {
 		return errors.Wrap(err, "upload avatar")
 	}
-	p.logger.Info("user found", zap.Int("len", len(avatar)))
+	p.logger.Info("user found")
 
 	fileName := "avatar.webp"
 	var buff bytes.Buffer

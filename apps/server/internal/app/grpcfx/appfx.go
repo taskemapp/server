@@ -1,4 +1,4 @@
-package grpc
+package grpcfx
 
 import (
 	"context"
@@ -9,10 +9,9 @@ import (
 	"github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/recovery"
 	"github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/selector"
 	"github.com/taskemapp/server/apps/server/internal/config"
-	"github.com/taskemapp/server/apps/server/internal/grpc/auth"
 	"github.com/taskemapp/server/apps/server/internal/grpc/interceptor"
-	"github.com/taskemapp/server/apps/server/internal/grpc/profile"
-	"github.com/taskemapp/server/apps/server/internal/grpc/team"
+	"github.com/taskemapp/server/apps/server/internal/logger"
+	"github.com/taskemapp/server/apps/server/internal/repository/token"
 	v1 "github.com/taskemapp/server/apps/server/tools/gen/grpc/v1"
 	"go.uber.org/fx"
 	"go.uber.org/zap"
@@ -24,20 +23,60 @@ import (
 	"strconv"
 )
 
+var App = fx.Options(
+	fx.Module(
+		"grpc",
+
+		fx.Provide(
+			fx.Private,
+			interceptor.New,
+			fx.Annotate(token.NewClient, fx.As(new(token.Repository))),
+
+			New,
+		),
+
+		fx.Invoke(
+			func(lc fx.Lifecycle, log *zap.Logger, c config.Config, server GrpcServer) {
+				lc.Append(
+					fx.Hook{
+						OnStart: func(ctx context.Context) error {
+							go func() {
+								err := server.Run(c)
+								log.Error("server stopped", zap.Error(err))
+							}()
+
+							log.Info("server started on port", zap.String("addr", strconv.Itoa(c.GrpcPort)))
+
+							return nil
+						},
+						OnStop: func(ctx context.Context) error {
+							log.Info("gracefully stopping grpc server")
+							server.GracefulStop()
+
+							log.Info("server stopped")
+							return nil
+						},
+					},
+				)
+			},
+		),
+	),
+)
+
 type Opts struct {
 	fx.In
-	AuthServer    *auth.Server
-	ProfileServer *profile.Server
-	TeamServer    *team.Server
-	Log           *zap.Logger
+	AuthServer    v1.AuthServer
+	ProfileServer v1.ProfileServer
+	TeamServer    v1.TeamServer
+	Log           logger.Logger
 	Ic            *interceptor.Interceptor
 }
 
-type App struct {
+type GrpcServer struct {
 	Srv *grpc.Server
 }
 
-func New(opts Opts) App {
+func New(opts Opts) GrpcServer {
 	logOpts := []logging.Option{
 		logging.WithLogOnEvents(
 			logging.StartCall, logging.FinishCall,
@@ -47,7 +86,7 @@ func New(opts Opts) App {
 
 	recoveryOpts := []recovery.Option{
 		recovery.WithRecoveryHandler(func(p any) (err error) {
-			opts.Log.Sugar().Errorw("Recovered from panic", "panic", p)
+			opts.Log.Error("Recovered from panic", zap.Any("panic", p))
 			return status.Error(codes.Internal, "Internal server error")
 		}),
 	}
@@ -71,10 +110,10 @@ func New(opts Opts) App {
 	v1.RegisterTeamServer(srv, opts.TeamServer)
 	reflection.Register(srv)
 
-	return App{Srv: srv}
+	return GrpcServer{Srv: srv}
 }
 
-func (a App) Run(c config.Config) error {
+func (a GrpcServer) Run(c config.Config) error {
 	l, err := net.Listen("tcp", fmt.Sprintf(":%d", c.GrpcPort))
 	if err != nil {
 		return errors.Wrap(err, "run")
@@ -86,37 +125,13 @@ func (a App) Run(c config.Config) error {
 	return nil
 }
 
-func (a App) GracefulStop() {
+func (a GrpcServer) GracefulStop() {
 	a.Srv.GracefulStop()
-}
-
-func Invoke(lc fx.Lifecycle, log *zap.Logger, c config.Config, app App) {
-	lc.Append(
-		fx.Hook{
-			OnStart: func(ctx context.Context) error {
-				go func() {
-					err := app.Run(c)
-					log.Error("server stopped", zap.Error(err))
-				}()
-
-				log.Info("Server started on port", zap.String("addr", strconv.Itoa(c.GrpcPort)))
-
-				return nil
-			},
-			OnStop: func(ctx context.Context) error {
-				log.Info("Gracefully stopping grpc server")
-				app.GracefulStop()
-
-				log.Info("Server stopped")
-				return nil
-			},
-		},
-	)
 }
 
 // interceptorLogger Retrieved from
 // https://github.com/grpc-ecosystem/go-grpc-middleware/blob/62b7de50cda5a5d633f1013bfbe50e0f38db34ef/interceptors/logging/examples/zap/example_test.go#L17
-func interceptorLogger(l *zap.Logger) logging.Logger {
+func interceptorLogger(l logger.Logger) logging.Logger {
 	return logging.LoggerFunc(func(ctx context.Context, lvl logging.Level, msg string, fields ...any) {
 		f := make([]zap.Field, 0, len(fields)/2)
 
@@ -136,17 +151,17 @@ func interceptorLogger(l *zap.Logger) logging.Logger {
 			}
 		}
 
-		logger := l.WithOptions(zap.AddCallerSkip(1)).With(f...)
+		log := l.WithOptions(zap.AddCallerSkip(1)).With(f...)
 
 		switch lvl {
 		case logging.LevelDebug:
-			logger.Debug(msg)
+			log.Debug(msg)
 		case logging.LevelInfo:
-			logger.Info(msg)
+			log.Info(msg)
 		case logging.LevelWarn:
-			logger.Warn(msg)
+			log.Warn(msg)
 		case logging.LevelError:
-			logger.Error(msg)
+			log.Error(msg)
 		default:
 			panic(fmt.Sprintf("unknown level %v", lvl))
 		}

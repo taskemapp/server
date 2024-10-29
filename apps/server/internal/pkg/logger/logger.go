@@ -16,6 +16,7 @@ type Logger interface {
 	WithScope(scope string) Logger
 	WithMethod(method string) Logger
 	WithOptions(opts ...zap.Option) Logger
+	WithComponent(component string) Logger
 }
 
 type logger struct {
@@ -71,5 +72,12 @@ func (l *logger) WithOptions(opts ...zap.Option) Logger {
 	return &logger{
 		Config: l.Config,
 		Logger: l.Logger.WithOptions(opts...),
+	}
+}
+
+func (l *logger) WithComponent(component string) Logger {
+	return &logger{
+		Config: l.Config,
+		Logger: l.Logger.With(zap.String("component", component)),
 	}
 }

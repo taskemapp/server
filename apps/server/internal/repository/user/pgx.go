@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 	"github.com/jackc/pgx/v5"
-	"go.uber.org/zap"
+	"github.com/taskemapp/server/apps/server/internal/pkg/logger"
 	"time"
 
 	"github.com/Masterminds/squirrel"
@@ -18,12 +18,12 @@ const tableName = "users"
 type Opts struct {
 	fx.In
 	Pgx    *pgxpool.Pool
-	Logger *zap.Logger
+	Logger logger.Logger
 }
 
 type Pgx struct {
 	pgx    *pgxpool.Pool
-	logger *zap.Logger
+	logger logger.Logger
 }
 
 func NewPgx(opts Opts) *Pgx {

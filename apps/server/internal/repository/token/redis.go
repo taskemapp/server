@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/go-faster/errors"
 	"github.com/go-redis/redis/v8"
+	"github.com/taskemapp/server/apps/server/internal/pkg/logger"
 	"go.uber.org/fx"
 	"go.uber.org/zap"
 )
@@ -12,12 +13,12 @@ import (
 type Opts struct {
 	fx.In
 	Client *redis.Client
-	Logger *zap.Logger
+	Logger logger.Logger
 }
 
 type Client struct {
 	client *redis.Client
-	logger *zap.Logger
+	logger logger.Logger
 }
 
 func NewClient(opts Opts) (*Client, error) {
@@ -36,22 +37,22 @@ func (rc *Client) SetToken(ctx context.Context, opts CreateOpts) error {
 	).Result()
 
 	if err != nil {
-		rc.logger.Sugar().Error("Failed to set token: ", err)
+		rc.logger.Error("Failed to set token: ", zap.Error(err))
 		return err
 	}
 
-	rc.logger.Sugar().Infof("Token set: %s", val)
+	rc.logger.Info("Token set: %s", zap.String("ok", val))
 	return nil
 }
 
 func (rc *Client) GetToken(ctx context.Context, key string) (string, error) {
 	val, err := rc.client.Get(ctx, key).Result()
 	if errors.Is(err, redis.Nil) {
-		rc.logger.Sugar().Warn("Failed to get token: ", err)
+		rc.logger.Warn("Failed to get token: ", zap.Error(err))
 		return "", errors.Wrap(ErrNotFound, "Failed to get token")
 	}
 	if err != nil {
-		rc.logger.Sugar().Error("Failed to get token: ", err)
+		rc.logger.Error("Failed to get token: ", zap.Error(err))
 		return "", errors.Wrap(err, "Failed to get token")
 	}
 

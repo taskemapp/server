@@ -10,6 +10,10 @@ import (
 	"google.golang.org/grpc/status"
 )
 
+type ctxKey struct {
+	key string
+}
+
 func provideUserID(ctx context.Context, payload jwt.Claims) (context.Context, error) {
 	uid, err := uuid.Parse(payload["uid"].(string))
 	if err != nil {
@@ -21,12 +25,12 @@ func provideUserID(ctx context.Context, payload jwt.Claims) (context.Context, er
 		logging.Fields{"user_id", uid.String()},
 	)
 
-	return context.WithValue(ctx, CtxKey{"uid"}, uid), nil
+	return context.WithValue(ctx, ctxKey{"uid"}, uid), nil
 }
 
 // GetUserID from context, only throws ErrGetUserID if uid not found in context
 func GetUserID(ctx context.Context) (uuid.UUID, error) {
-	if uid, ok := ctx.Value(CtxKey{"uid"}).(uuid.UUID); ok {
+	if uid, ok := ctx.Value(ctxKey{"uid"}).(uuid.UUID); ok {
 		return uid, nil
 	}
 
@@ -44,12 +48,12 @@ func provideReqID(ctx context.Context) (context.Context, error) {
 		logging.Fields{"request_id", rid.String()},
 	)
 
-	return context.WithValue(ctx, CtxKey{"rid"}, rid), nil
+	return context.WithValue(ctx, ctxKey{"rid"}, rid), nil
 }
 
 // GetRequestID from context, only throws ErrRequestID if uid not found in context
 func GetRequestID(ctx context.Context) (uuid.UUID, error) {
-	if uid, ok := ctx.Value(CtxKey{"uid"}).(uuid.UUID); ok {
+	if uid, ok := ctx.Value(ctxKey{"uid"}).(uuid.UUID); ok {
 		return uid, nil
 	}
 

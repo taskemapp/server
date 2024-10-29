@@ -11,10 +11,6 @@ import (
 	"google.golang.org/grpc/status"
 )
 
-type CtxKey struct {
-	key string
-}
-
 // Auth get token from grpc request metadata
 //
 // Already throws formated grpc with status.Errorf

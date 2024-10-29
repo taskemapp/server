@@ -5,6 +5,7 @@ import (
 	"errors"
 	"github.com/taskemapp/server/apps/server/internal/config"
 	"github.com/taskemapp/server/apps/server/internal/grpc/interceptor"
+	"github.com/taskemapp/server/apps/server/internal/pkg/logger"
 	"github.com/taskemapp/server/apps/server/internal/pkg/validation"
 	"github.com/taskemapp/server/apps/server/internal/repository/token"
 	"github.com/taskemapp/server/apps/server/internal/repository/user"
@@ -21,7 +22,7 @@ import (
 type Opts struct {
 	fx.In
 	Auth      auth.Service
-	Logger    *zap.Logger
+	Logger    logger.Logger
 	Config    config.Config
 	TokenRepo token.Repository
 }
@@ -29,7 +30,7 @@ type Opts struct {
 type Server struct {
 	v1.UnimplementedAuthServer
 	auth      auth.Service
-	logger    *zap.Logger
+	logger    logger.Logger
 	config    config.Config
 	tokenRepo token.Repository
 }
@@ -63,7 +64,7 @@ func (s *Server) Login(
 		})
 
 	if err != nil {
-		s.logger.Sugar().Error(err)
+		s.logger.Error("", zap.Error(err))
 		switch {
 		case errors.Is(err, user.ErrNotFound):
 			return nil, status.Error(codes.NotFound, "Not found")
@@ -115,7 +116,7 @@ func (s *Server) SignUp(
 			Password: req.Password,
 		})
 	if err != nil {
-		s.logger.Sugar().Error(err)
+		s.logger.Error("", zap.Error(err))
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 

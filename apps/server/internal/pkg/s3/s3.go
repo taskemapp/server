@@ -3,6 +3,7 @@ package s3
 import (
 	"context"
 	"fmt"
+	"github.com/taskemapp/server/apps/server/internal/pkg/logger"
 	"time"
 
 	"github.com/go-faster/errors"
@@ -24,7 +25,7 @@ func New(cfg Config) (*minio.Client, error) {
 	return c, nil
 }
 
-func Invoke(lc fx.Lifecycle, log *zap.Logger, cfg Config, c *minio.Client) {
+func Invoke(lc fx.Lifecycle, log logger.Logger, cfg Config, c *minio.Client) {
 	lc.Append(
 		fx.Hook{
 			OnStart: func(ctx context.Context) error {
@@ -37,7 +38,7 @@ func Invoke(lc fx.Lifecycle, log *zap.Logger, cfg Config, c *minio.Client) {
 					return fmt.Errorf("cannot list buckets: %w", err)
 				}
 
-				log.Sugar().Debug("Bucket exist: ", ok)
+				log.Debug("Bucket exist: ", zap.Bool("exist", ok))
 
 				if !ok {
 					err = c.MakeBucket(ctx, cfg.Bucket, minio.MakeBucketOptions{})

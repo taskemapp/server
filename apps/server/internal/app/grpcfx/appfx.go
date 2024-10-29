@@ -43,7 +43,7 @@ var App = fx.Options(
 		),
 
 		fx.Invoke(
-			func(lc fx.Lifecycle, log *zap.Logger, c config.Config, server GrpcServer) {
+			func(lc fx.Lifecycle, log logger.Logger, c config.Config, server GrpcServer) {
 				lc.Append(
 					fx.Hook{
 						OnStart: func(ctx context.Context) error {

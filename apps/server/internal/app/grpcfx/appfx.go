@@ -10,7 +10,7 @@ import (
 	"github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/selector"
 	"github.com/taskemapp/server/apps/server/internal/config"
 	"github.com/taskemapp/server/apps/server/internal/grpc/interceptor"
-	"github.com/taskemapp/server/apps/server/internal/logger"
+	"github.com/taskemapp/server/apps/server/internal/pkg/logger"
 	"github.com/taskemapp/server/apps/server/internal/repository/token"
 	v1 "github.com/taskemapp/server/apps/server/tools/gen/grpc/v1"
 	"go.uber.org/fx"

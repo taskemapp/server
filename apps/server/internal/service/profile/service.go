@@ -5,7 +5,7 @@ import (
 	"context"
 	"github.com/go-faster/errors"
 	"github.com/google/uuid"
-	"github.com/taskemapp/server/apps/server/internal/logger"
+	"github.com/taskemapp/server/apps/server/internal/pkg/logger"
 	"github.com/taskemapp/server/apps/server/internal/repository/user"
 	"github.com/taskemapp/server/apps/server/internal/repository/user_file"
 	"github.com/taskemapp/server/apps/server/internal/service/profile/image"

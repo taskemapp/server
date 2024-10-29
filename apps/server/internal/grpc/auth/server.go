@@ -5,7 +5,7 @@ import (
 	"errors"
 	"github.com/taskemapp/server/apps/server/internal/config"
 	"github.com/taskemapp/server/apps/server/internal/grpc/interceptor"
-	"github.com/taskemapp/server/apps/server/internal/logger"
+	"github.com/taskemapp/server/apps/server/internal/pkg/logger"
 	"github.com/taskemapp/server/apps/server/internal/pkg/validation"
 	"github.com/taskemapp/server/apps/server/internal/repository/token"
 	"github.com/taskemapp/server/apps/server/internal/repository/user"

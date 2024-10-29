@@ -7,7 +7,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
-	"github.com/taskemapp/server/apps/server/internal/logger"
+	"github.com/taskemapp/server/apps/server/internal/pkg/logger"
 	"go.uber.org/fx"
 	"time"
 )

@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"github.com/go-faster/errors"
 	"github.com/go-redis/redis/v8"
-	"github.com/taskemapp/server/apps/server/internal/logger"
+	"github.com/taskemapp/server/apps/server/internal/pkg/logger"
 	"go.uber.org/fx"
 	"go.uber.org/zap"
 )

@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"github.com/taskemapp/server/apps/server/internal/app/grpcfx"
 	"github.com/taskemapp/server/apps/server/internal/app/profilefx"
-	"github.com/taskemapp/server/apps/server/internal/logger"
+	"github.com/taskemapp/server/apps/server/internal/pkg/logger"
 	"net/url"
 
 	"github.com/go-redis/redis/v8"

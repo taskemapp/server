@@ -1,7 +1,7 @@
 package taskfx
 
 import (
-	"github.com/taskemapp/server/apps/server/internal/logger"
+	"github.com/taskemapp/server/apps/server/internal/pkg/logger"
 	"github.com/taskemapp/server/apps/server/internal/repository/task"
 	"go.uber.org/fx"
 )

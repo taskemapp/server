@@ -78,6 +78,6 @@ func (l *logger) WithOptions(opts ...zap.Option) Logger {
 func (l *logger) WithComponent(component string) Logger {
 	return &logger{
 		Config: l.Config,
-		Logger: l.Logger.With("component", zap.String(component)),
+		Logger: l.Logger.With(zap.String("component", component)),
 	}
 }

@@ -3,7 +3,7 @@ package profile
 import (
 	"context"
 	"github.com/taskemapp/server/apps/server/internal/grpc/interceptor"
-	"github.com/taskemapp/server/apps/server/internal/logger"
+	"github.com/taskemapp/server/apps/server/internal/pkg/logger"
 	"github.com/taskemapp/server/apps/server/internal/service/profile"
 	v1 "github.com/taskemapp/server/apps/server/tools/gen/grpc/v1"
 	"go.uber.org/fx"

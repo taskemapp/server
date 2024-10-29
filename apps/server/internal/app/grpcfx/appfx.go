@@ -23,9 +23,16 @@ import (
 	"strconv"
 )
 
+const module = "grpc"
+
 var App = fx.Options(
 	fx.Module(
-		"grpc",
+		module,
+		fx.Decorate(
+			func(l logger.Logger) logger.Logger {
+				return l.WithScope(module)
+			},
+		),
 
 		fx.Provide(
 			fx.Private,

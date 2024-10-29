@@ -6,6 +6,7 @@ import (
 	"github.com/pkg/errors"
 	"github.com/taskemapp/server/apps/server/internal/config"
 	"github.com/taskemapp/server/apps/server/internal/grpc/interceptor"
+	"github.com/taskemapp/server/apps/server/internal/logger"
 	"github.com/taskemapp/server/apps/server/internal/mapper"
 	"github.com/taskemapp/server/apps/server/internal/repository/token"
 	"github.com/taskemapp/server/apps/server/internal/service"
@@ -22,7 +23,7 @@ type Opts struct {
 	fx.In
 	Team      team.Service
 	Config    config.Config
-	Logger    *zap.Logger
+	Logger    logger.Logger
 	RedisRepo token.Repository
 }
 
@@ -30,7 +31,7 @@ type Server struct {
 	v1.UnimplementedTeamServer
 	team      team.Service
 	config    config.Config
-	logger    *zap.Logger
+	logger    logger.Logger
 	redisRepo token.Repository
 }
 
@@ -91,7 +92,7 @@ func (t *Server) Create(ctx context.Context, request *v1.CreateTeamRequest) (*v1
 		Description: request.Description,
 	})
 	if err != nil {
-		t.logger.Sugar().Error(err)
+		t.logger.Error("", zap.Error(err))
 		switch {
 		case errors.As(err, pgconn.PgError{}):
 			return nil, status.Error(codes.Internal, "Internal server error")

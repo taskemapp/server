@@ -7,6 +7,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/taskemapp/server/apps/server/internal/logger"
 	"go.uber.org/fx"
 	"go.uber.org/zap"
 	"time"
@@ -17,12 +18,12 @@ const tableName = "team_members"
 type Opts struct {
 	fx.In
 	Pgx    *pgxpool.Pool
-	Logger *zap.Logger
+	Logger logger.Logger
 }
 
 type Pgx struct {
 	pgx    *pgxpool.Pool
-	logger *zap.Logger
+	logger logger.Logger
 }
 
 func NewPgx(opts Opts) (*Pgx, error) {
@@ -63,7 +64,7 @@ func (p *Pgx) FindByID(ctx context.Context, tmID uuid.UUID) (*TeamMember, error)
 		&tm.IsLeaved,
 	)
 	if err != nil {
-		p.logger.Sugar().Error(err)
+		p.logger.Error("", zap.Error(err))
 		if errors.Is(err, pgx.ErrNoRows) {
 			return nil, ErrNotFound
 		}
@@ -98,7 +99,7 @@ func (p *Pgx) FindByUserAndTeam(ctx context.Context, userID uuid.UUID, teamID uu
 		&tm.IsLeaved,
 	)
 	if err != nil {
-		p.logger.Sugar().Error(err)
+		p.logger.Error("", zap.Error(err))
 		if errors.Is(err, pgx.ErrNoRows) {
 			return nil, ErrNotFound
 		}
@@ -134,7 +135,7 @@ func (p *Pgx) Create(ctx context.Context, opts CreateOpts) (*TeamMember, error) 
 
 	defer func() {
 		if err != nil {
-			p.logger.Sugar().Error(err)
+			p.logger.Error("", zap.Error(err))
 			_ = tx.Rollback(ctx)
 		} else {
 			_ = tx.Commit(ctx)
@@ -151,7 +152,7 @@ func (p *Pgx) Create(ctx context.Context, opts CreateOpts) (*TeamMember, error) 
 		&tm.IsLeaved,
 	)
 	if err != nil {
-		p.logger.Sugar().Error(err)
+		p.logger.Error("", zap.Error(err))
 		return nil, err
 	}
 
@@ -178,7 +179,7 @@ func (p *Pgx) Update(ctx context.Context, tmID uuid.UUID, opts UpdateOpts) (*Tea
 
 	_, err = p.pgx.Exec(ctx, query, args...)
 	if err != nil {
-		p.logger.Sugar().Error(err)
+		p.logger.Error("", zap.Error(err))
 		return nil, err
 	}
 

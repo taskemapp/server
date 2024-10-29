@@ -5,6 +5,7 @@ import (
 	"context"
 	"github.com/go-faster/errors"
 	"github.com/google/uuid"
+	"github.com/taskemapp/server/apps/server/internal/logger"
 	"github.com/taskemapp/server/apps/server/internal/repository/user"
 	"github.com/taskemapp/server/apps/server/internal/repository/user_file"
 	"github.com/taskemapp/server/apps/server/internal/service/profile/image"
@@ -17,14 +18,14 @@ type Opts struct {
 	fx.In
 	UserFileRepo user_file.Repository
 	UserRepo     user.Repository
-	Logger       *zap.Logger
+	Logger       logger.Logger
 	Processing   image.Processing
 }
 
 type Profile struct {
 	userFileRepo user_file.Repository
 	userRepo     user.Repository
-	logger       *zap.Logger
+	logger       logger.Logger
 	processing   image.Processing
 }
 

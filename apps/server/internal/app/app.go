@@ -29,21 +29,9 @@ const (
 )
 
 var App = fx.Options(
-	//TODO(ripls56): temp, will be fixed in next pr
-	fx.Provide(fx.Annotate(func() (logger.Logger, error) {
-		c := zap.NewProductionConfig()
-		c.OutputPaths = []string{"stdout"}
-		c.ErrorOutputPaths = []string{"stderr"}
-
-		l, err := logger.New(&c)
-		if err != nil {
-			return nil, err
-		}
-		return l, err
-	}, fx.As(new(logger.Logger)))),
+	fx.Provide(fx.Annotate(setupLogger, fx.As(new(logger.Logger)))),
 
 	fx.Provide(setupConfig),
-	fx.Provide(setupLogger),
 	fx.Provide(setupPgPool),
 	fx.Provide(setupRabbitMq),
 	fx.Provide(setupRedisClient),
@@ -81,19 +69,26 @@ func setupConfig() (config.Config, error) {
 	return cfg, nil
 }
 
-func setupLogger(c config.Config) *zap.Logger {
-	var log *zap.Logger
+func setupLogger(c config.Config) (logger.Logger, error) {
+	var zc zap.Config
 
 	switch c.AppEnv {
 	case envDev:
-		log, _ = zap.NewDevelopment()
+		zc = zap.NewDevelopmentConfig()
 	case envProd:
-		log, _ = zap.NewProduction()
+		zc = zap.NewProductionConfig()
 	default:
-		log, _ = zap.NewDevelopment()
+		zc = zap.NewDevelopmentConfig()
 	}
 
-	return log
+	zc.OutputPaths = []string{"stdout"}
+	zc.ErrorOutputPaths = []string{"stderr"}
+
+	l, err := logger.New(&zc)
+	if err != nil {
+		return nil, err
+	}
+	return l, err
 }
 
 func setupPgPool(c config.Config) (*pgxpool.Pool, error) {

@@ -2,6 +2,7 @@ package profilefx
 
 import (
 	profilesrv "github.com/taskemapp/server/apps/server/internal/grpc/profile"
+	"github.com/taskemapp/server/apps/server/internal/logger"
 	"github.com/taskemapp/server/apps/server/internal/pkg/s3"
 	"github.com/taskemapp/server/apps/server/internal/repository/user"
 	"github.com/taskemapp/server/apps/server/internal/repository/user_file"
@@ -9,15 +10,16 @@ import (
 	"github.com/taskemapp/server/apps/server/internal/service/profile/image"
 	v1 "github.com/taskemapp/server/apps/server/tools/gen/grpc/v1"
 	"go.uber.org/fx"
-	"go.uber.org/zap"
 )
+
+const module = "profile"
 
 var App = fx.Options(
 	fx.Module(
-		"profile",
+		module,
 		fx.Decorate(
-			func(l *zap.Logger) *zap.Logger {
-				return l.With(zap.String("scope", "profile"))
+			func(l logger.Logger) logger.Logger {
+				return l.WithScope(module)
 			},
 		),
 

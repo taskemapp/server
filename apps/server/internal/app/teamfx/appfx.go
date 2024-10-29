@@ -2,6 +2,7 @@ package teamfx
 
 import (
 	teamserver "github.com/taskemapp/server/apps/server/internal/grpc/team"
+	"github.com/taskemapp/server/apps/server/internal/logger"
 	"github.com/taskemapp/server/apps/server/internal/repository/team"
 	"github.com/taskemapp/server/apps/server/internal/repository/team_member"
 	"github.com/taskemapp/server/apps/server/internal/repository/token"
@@ -10,9 +11,17 @@ import (
 	"go.uber.org/fx"
 )
 
+const module = "team"
+
 var App = fx.Options(
 	fx.Module(
-		"team",
+		module,
+		fx.Decorate(
+			func(l logger.Logger) logger.Logger {
+				return l.WithScope(module)
+			},
+		),
+
 		fx.Provide(
 			fx.Private,
 			fx.Annotate(team.NewPgx, fx.As(new(team.Repository))),

@@ -7,8 +7,8 @@ import (
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/taskemapp/server/apps/server/internal/logger"
 	"go.uber.org/fx"
-	"go.uber.org/zap"
 	"time"
 )
 
@@ -17,12 +17,12 @@ const tableName = "teams"
 type Opts struct {
 	fx.In
 	Pgx    *pgxpool.Pool
-	Logger *zap.Logger
+	Logger logger.Logger
 }
 
 type Pgx struct {
 	pgx    *pgxpool.Pool
-	logger *zap.Logger
+	logger logger.Logger
 }
 
 func NewPgx(opts Opts) (*Pgx, error) {

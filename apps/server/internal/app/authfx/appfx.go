@@ -3,6 +3,7 @@ package authfx
 import (
 	"github.com/taskemapp/server/apps/server/internal/config"
 	authsrv "github.com/taskemapp/server/apps/server/internal/grpc/auth"
+	"github.com/taskemapp/server/apps/server/internal/logger"
 	"github.com/taskemapp/server/apps/server/internal/pkg/notifier"
 	"github.com/taskemapp/server/apps/server/internal/repository/token"
 	"github.com/taskemapp/server/apps/server/internal/repository/user"
@@ -11,9 +12,17 @@ import (
 	"go.uber.org/fx"
 )
 
+const module = "auth"
+
 var App = fx.Options(
 	fx.Module(
-		"auth",
+		module,
+		fx.Decorate(
+			func(l logger.Logger) logger.Logger {
+				return l.WithScope(module)
+			},
+		),
+
 		fx.Provide(
 			fx.Private,
 			fx.Annotate(

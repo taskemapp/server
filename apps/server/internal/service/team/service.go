@@ -3,6 +3,7 @@ package team
 import (
 	"context"
 	"github.com/google/uuid"
+	"github.com/taskemapp/server/apps/server/internal/logger"
 	"github.com/taskemapp/server/apps/server/internal/repository/team"
 	"github.com/taskemapp/server/apps/server/internal/repository/team_member"
 	"github.com/taskemapp/server/apps/server/internal/repository/token"
@@ -15,22 +16,23 @@ type Opts struct {
 	fx.In
 	TeamRepo       team.Repository
 	TeamMemberRepo team_member.Repository
-	Logger         *zap.Logger
+	Logger         logger.Logger
 	RedisRepo      token.Repository
 }
 
 type Team struct {
 	teamRepo       team.Repository
 	teamMemberRepo team_member.Repository
-	logger         *zap.Logger
+	logger         logger.Logger
 	redisRepo      token.Repository
 }
 
 func New(opts Opts) *Team {
+	l := opts.Logger.WithComponent("team.service")
 	return &Team{
 		teamRepo:       opts.TeamRepo,
 		teamMemberRepo: opts.TeamMemberRepo,
-		logger:         opts.Logger,
+		logger:         l,
 		redisRepo:      opts.RedisRepo,
 	}
 }
@@ -38,7 +40,9 @@ func New(opts Opts) *Team {
 func (t *Team) Get(ctx context.Context, id uuid.UUID) (*team.Team, error) {
 	f, err := t.teamRepo.FindByID(ctx, id)
 	if err != nil {
-		t.logger.Sugar().Error(err)
+		t.logger.
+			WithMethod("get").
+			Error("", zap.Error(err))
 		return nil, err
 	}
 	return f, nil
@@ -50,7 +54,9 @@ func (t *Team) GetUserTeams(ctx context.Context, userID uuid.UUID, pgOpts servic
 		PerPage: pgOpts.PerPage,
 	})
 	if err != nil {
-		t.logger.Sugar().Error(err)
+		t.logger.
+			WithMethod("get_user_teams").
+			Error("", zap.Error(err))
 		return nil, err
 	}
 	return fMany, nil
@@ -63,7 +69,9 @@ func (t *Team) Create(ctx context.Context, opts CreateOpts) (*team.Team, error) 
 		Creator:     opts.CreatorID,
 	})
 	if err != nil {
-		t.logger.Sugar().Error(err)
+		t.logger.
+			WithMethod("create").
+			Error("", zap.Error(err))
 		return nil, err
 	}
 	return c, nil
@@ -75,7 +83,9 @@ func (t *Team) Join(ctx context.Context, opts JoinOpts) error {
 		TeamID: opts.TeamID,
 	})
 	if err != nil {
-		t.logger.Sugar().Error(err)
+		t.logger.
+			WithMethod("join").
+			Error("", zap.Error(err))
 		return err
 	}
 	return err
@@ -84,7 +94,9 @@ func (t *Team) Join(ctx context.Context, opts JoinOpts) error {
 func (t *Team) Leave(ctx context.Context, opts LeaveOpts) error {
 	tm, err := t.teamMemberRepo.FindByUserAndTeam(ctx, opts.UserID, opts.TeamID)
 	if err != nil {
-		t.logger.Sugar().Error(err)
+		t.logger.
+			WithMethod("leave").
+			Error("", zap.Error(err))
 		return err
 	}
 
@@ -97,7 +109,9 @@ func (t *Team) Leave(ctx context.Context, opts LeaveOpts) error {
 		},
 	)
 	if err != nil {
-		t.logger.Sugar().Error(err)
+		t.logger.
+			WithMethod("leave").
+			Error("", zap.Error(err))
 		return err
 	}
 

@@ -3,21 +3,19 @@ package app
 import (
 	"context"
 	"fmt"
+	"github.com/taskemapp/server/apps/server/internal/app/grpcfx"
 	"github.com/taskemapp/server/apps/server/internal/app/profilefx"
-	"github.com/taskemapp/server/apps/server/internal/pkg/notifier"
+	"github.com/taskemapp/server/apps/server/internal/logger"
 	"net/url"
 
 	"github.com/go-redis/redis/v8"
 	"github.com/jackc/pgx/v5/pgxpool"
 	_ "github.com/jackc/pgx/v5/stdlib"
 	amqp "github.com/rabbitmq/amqp091-go"
-	"github.com/taskemapp/server/apps/server/internal/app/auth"
-	"github.com/taskemapp/server/apps/server/internal/app/grpc"
-	grpcsrv "github.com/taskemapp/server/apps/server/internal/app/grpc"
-	"github.com/taskemapp/server/apps/server/internal/app/task"
-	"github.com/taskemapp/server/apps/server/internal/app/team"
+	"github.com/taskemapp/server/apps/server/internal/app/authfx"
+	"github.com/taskemapp/server/apps/server/internal/app/taskfx"
+	"github.com/taskemapp/server/apps/server/internal/app/teamfx"
 	"github.com/taskemapp/server/apps/server/internal/config"
-	"github.com/taskemapp/server/apps/server/internal/grpc/interceptor"
 	"github.com/taskemapp/server/apps/server/internal/pkg/migrations"
 	"github.com/taskemapp/server/apps/server/internal/pkg/s3"
 	"github.com/taskemapp/server/libs/queue"
@@ -31,30 +29,36 @@ const (
 )
 
 var App = fx.Options(
+	//TODO(ripls56): temp, will be fixed in next pr
+	fx.Provide(fx.Annotate(func() (logger.Logger, error) {
+		c := zap.NewProductionConfig()
+		c.OutputPaths = []string{"stdout"}
+		c.ErrorOutputPaths = []string{"stderr"}
+
+		l, err := logger.New(&c)
+		if err != nil {
+			return nil, err
+		}
+		return l, err
+	}, fx.As(new(logger.Logger)))),
+
 	fx.Provide(setupConfig),
 	fx.Provide(setupLogger),
 	fx.Provide(setupPgPool),
 	fx.Provide(setupRabbitMq),
 	fx.Provide(setupRedisClient),
-	fx.Provide(fx.Annotate(func(cfg config.Config) *notifier.BasicGenerator {
-		return &notifier.BasicGenerator{HostDomain: cfg.HostDomain}
-	}, fx.As(new(notifier.LinkGenerator)))),
 
-	//RabbitMq
 	fx.Provide(queue.NewConfig),
 	fx.Provide(fx.Annotate(queue.NewMQ, fx.As(new(queue.Queue)))),
 
-	//General app
-	auth.App,
-	team.App,
+	authfx.App,
+	teamfx.App,
 	profilefx.App,
-	task.App,
-	fx.Provide(interceptor.New),
-	fx.Provide(grpcsrv.New),
+	taskfx.App,
+	grpcfx.App,
 
 	fx.Invoke(
 		migrations.Invoke,
-		grpc.Invoke,
 	),
 )
 
@@ -112,7 +116,10 @@ func setupRedisClient(c config.Config) (*redis.Client, error) {
 
 	var db int
 	if redisURL.Path != "" {
-		fmt.Sscanf(redisURL.Path, "/%d", &db)
+		_, err = fmt.Sscanf(redisURL.Path, "/%d", &db)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	rdb := redis.NewClient(&redis.Options{
